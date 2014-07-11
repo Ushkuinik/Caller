@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Caller</string>
+    <string name="strMainSwitch">Enable Caller</string>
+    <string name="title_activity_caller">Caller</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="strAnswer">Answer</string>
+    <string name="strDecline">Decline</string>
+    <string name="strNumber">Enter phone number</string>
+    <string name="strDefaultNumber">123456</string>
+
+</resources>
