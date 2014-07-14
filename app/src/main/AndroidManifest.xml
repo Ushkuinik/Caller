@@ -20,11 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ActivityCaller"
-            android:label="@string/title_activity_caller"
-            android:theme="@android:style/Theme.Holo" >
-        </activity>
 
         <service
             android:name=".TopWindow" >

@@ -24,7 +24,7 @@ import wei.mark.standout.StandOutWindow;
  */
 public class CallDetectService extends Service {
     public static final int GOT_PHONE_NUMBER = 0;
-    static final String LOG_TAG = "CallDetectService";
+    final String LOG_TAG = "CallDetectService";
     private TelephonyManager tm;
     private CallStateListener callStateListener;
 
@@ -48,16 +48,7 @@ public class CallDetectService extends Service {
                     Bundle bundle = new Bundle();
                     bundle.putString("phoneNumber", incomingNumber);
                     StandOutWindow.sendData(context, TopWindow.class, StandOutWindow.DEFAULT_ID, GOT_PHONE_NUMBER, bundle, null, 0);
-/*
-                    Toast.makeText(context,
-                            "[Caller] Incoming: " + incomingNumber,
-                            Toast.LENGTH_LONG).show();
 
-                    Intent intent = new Intent(context, ActivityCaller.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("PhoneNumber", incomingNumber);
-                    context.startActivity(intent);
-*/
                     break;
                 case TelephonyManager.CALL_STATE_IDLE:
                     StandOutWindow.closeAll(context, TopWindow.class);
@@ -79,15 +70,11 @@ public class CallDetectService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, ": onStartCommand, startId: " + startId);
 
-        setRunning(true);
-
         callStateListener = new CallStateListener(this);
         tm = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
         if(tm != null) {
             tm.listen(callStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         }
-//        int res = super.onStartCommand(intent, flags, startId);
-//        return res;
         return START_STICKY;
     }
 
@@ -96,8 +83,6 @@ public class CallDetectService extends Service {
         Log.d(LOG_TAG, ": onDestroy");
 
         super.onDestroy();
-
-        setRunning(false);
 
         if(tm != null) {
             tm.listen(callStateListener, PhoneStateListener.LISTEN_NONE);
@@ -110,18 +95,5 @@ public class CallDetectService extends Service {
         Log.d(LOG_TAG, ": onBind");
         // not supporting binding
         return null;
-    }
-
-    private void setRunning(boolean running) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = pref.edit();
-
-        editor.putBoolean(LOG_TAG, running);
-        editor.apply();
-    }
-
-    public static boolean isRunning(Context context) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-        return pref.getBoolean(LOG_TAG, false);
     }
 }

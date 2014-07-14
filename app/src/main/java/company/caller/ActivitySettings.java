@@ -1,7 +1,9 @@
 package company.caller;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +11,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.Button;
 import android.view.View;
+import android.widget.TextView;
 
 import wei.mark.standout.StandOutWindow;
 
@@ -33,10 +37,10 @@ public class ActivitySettings extends Activity {
         Switch toggleMainSwitch = (Switch) findViewById(R.id.switchMainSwitch);
 
         // check if CallDetectService is already started
-        toggleMainSwitch.setChecked(CallDetectService.isRunning(this));
+        toggleMainSwitch.setChecked(isServiceRunning(CallDetectService.class));
 
         // Log CallDetectService state
-        if(CallDetectService.isRunning(this)) {
+        if(isServiceRunning(CallDetectService.class)) {
             Log.d(LOG_TAG, ": Service is already running");
         }
         else {
@@ -45,7 +49,13 @@ public class ActivitySettings extends Activity {
 
         toggleMainSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setDetectEnabled(isChecked);
+                Intent intent = new Intent(ActivitySettings.this, CallDetectService.class);
+                if (isChecked) {
+                    startService(intent);
+                }
+                else {
+                    stopService(intent);
+                }
             }
         });
 
@@ -55,25 +65,42 @@ public class ActivitySettings extends Activity {
                 public void onClick(View view) {
                     createDialog();
 
-                    /*
-                    Intent intent = new Intent(ActivitySettings.this, ActivityCaller.class);
-                    //intent.putExtra("PhoneNumber", "");
-                    startActivity(intent);
-                    */
                 }
+        });
+
+        SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
+
+
+        seekCallLogDepth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChanged = 0;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+                TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
+                textCallLogDepthValue.setText(Integer.toString(progress));
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
         });
     }
 
-    private void setDetectEnabled(boolean enable) {
 
-        Intent intent = new Intent(this, CallDetectService.class);
-        if (enable) {
-            startService(intent);
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
         }
-        else {
-            stopService(intent);
-        }
+        return false;
     }
+
+
+
 
     private void createDialog() {
 

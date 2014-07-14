@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The Window, which will float over Call screen when call incomes.
@@ -148,7 +150,9 @@ public class TopWindow extends StandOutWindow {
                 number = number.replace("-", "");
                 Log.d(LOG_TAG, ": onReceiveData(phoneNumber = " + number + ")");
 
-                listContactEvents(number);
+                //listContactEvents(number);
+                AsyncListFiller mt = new AsyncListFiller(id);
+                mt.execute();
                 break;
 
             default:
@@ -266,7 +270,8 @@ public class TopWindow extends StandOutWindow {
         listRecords.setAdapter(adapter);
 
         // scroll to the bottom
-        listRecords.setSelection(adapter.getCount() - 1);
+        listRecords.smoothScrollToPosition(adapter.getCount() - 1);
+
     }
 
 
@@ -433,5 +438,81 @@ public class TopWindow extends StandOutWindow {
             cursor.close();
         }
         return name;
+    }
+
+
+
+
+    class AsyncListFiller extends AsyncTask<Void,  ArrayList<Event>, Void> {
+        private int window_id;
+        ArrayList<Event> events = new ArrayList<Event>();
+        ListView listRecords = (ListView) view.findViewById(R.id.listView);
+        EventAdapter adapter = new EventAdapter(TopWindow.this, events);
+
+
+        AsyncListFiller(int id) {
+            window_id = id;
+            listRecords.setAdapter(adapter);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setTitle(window_id, "Begin");
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            ArrayList<Event> localEvents = new ArrayList<Event>();
+
+            try {
+
+                localEvents.clear();
+                Log.d(LOG_TAG, ": doInBackground1");
+                for(int i = 1; i < 6; i++) {
+                    localEvents.add(new Event(Event.EventType.EVENT_CALENDAR, "2014/08/01 15:00", "Event " + i));
+                }
+                publishProgress(localEvents);
+                TimeUnit.SECONDS.sleep(3);
+
+                localEvents.clear();
+                Log.d(LOG_TAG, ": doInBackground2");
+                for(int i = 1; i < 6; i++) {
+                    localEvents.add(new Event(Event.EventType.EVENT_REMINDER, "2014/08/01 15:00", "Event " + i));
+                }
+                publishProgress(localEvents);
+                TimeUnit.SECONDS.sleep(3);
+
+                localEvents.clear();
+                Log.d(LOG_TAG, ": doInBackground3");
+                for(int i = 1; i < 6; i++) {
+                    localEvents.add(new Event(Event.EventType.EVENT_MISSED_CALL, "2014/08/01 15:00", "Event " + i));
+                }
+                publishProgress(localEvents);
+                TimeUnit.SECONDS.sleep(3);
+
+                } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+
+
+        protected void onProgressUpdate(ArrayList<Event>... param) {
+            Log.d(LOG_TAG, ": onProgressUpdate");
+            for(Event e : param[0])
+                events.add(e);
+            adapter.notifyDataSetChanged();
+            listRecords.smoothScrollToPosition(adapter.getCount() - 1); // smoothScrollToPosition looks better then setSelection
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            setTitle(window_id, "End");
+        }
     }
 }

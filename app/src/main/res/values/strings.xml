@@ -9,6 +9,8 @@
     <string name="strAnswer">Answer</string>
     <string name="strDecline">Decline</string>
     <string name="strNumber">Enter phone number</string>
-    <string name="strDefaultNumber">123456</string>
+    <string name="strDefaultNumber"></string>
+    <string name="strCallLogDepthLabel">Call log depth: </string>
+    <string name="textCallLogValueDefault">0</string>
 
 </resources>
