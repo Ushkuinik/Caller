@@ -11,7 +11,7 @@ import android.provider.CalendarContract;
 import android.provider.CallLog;
 import android.util.Log;
 
-public abstract class EventRetriever extends AsyncTask<String, Event, Void>
+public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
 {
 	protected Context mContext;
 	final String LOG_TAG = "EventRetriever";
@@ -33,37 +33,41 @@ public abstract class EventRetriever extends AsyncTask<String, Event, Void>
 	}
 
 	@Override
-    protected Void doInBackground(final String... params)
+    protected Void doInBackground(final Contact... params)
     {
         Log.d(this.LOG_TAG, ": doInBackground");
 
-		if ((params == null) || (params[0].isEmpty()))
+		if (params == null)
 		{
 			// TODO No params error
 			return null;
 		}
 
-		String phoneNo = params[0];
-        try {
+		Contact contact = params[0];
 
-            // Do phone logs search first
-            this.doSearchPhoneLogs(phoneNo);
-
-            if (params[1] == null)
-            {
-                // TODO No "name" param
-                return null;
-            }
-
-            String contact = params[1].toLowerCase();
-
-            TimeUnit.SECONDS.sleep(2);
-            this.doSearchCalendarEvents(contact);
-            this.doSearchCalendarAttendees(contact);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        // Do phone logs search first
+        for(String number: contact.numbers) {
+            this.doSearchPhoneLogs(number);
         }
+
+        // Enum call log by phone numbers
+        for(String number: contact.numbers) {
+            Log.d(this.LOG_TAG, ": doInBackground numbers: " + number);
+            this.doSearchCalendarEvents(number);
+        }
+
+        // Look for events with name in it
+        if(contact.name != null) {
+            Log.d(this.LOG_TAG, ": doInBackground name: " + contact.name);
+            this.doSearchCalendarEvents(contact.name);
+        }
+//        TimeUnit.SECONDS.sleep(2);
+
+        // Enum calendar events by attendees
+        for(String email: contact.emails) {
+            this.doSearchCalendarAttendees(email);
+        }
+
 	    return null;
     }
 
@@ -168,38 +172,6 @@ public abstract class EventRetriever extends AsyncTask<String, Event, Void>
             title = (title == null) ? "" : title;
             desc = (desc == null) ? "" : desc;
 
-            /*
-            // Get attendees for this event
-            String[] projection2 = new String[] {
-                    CalendarContract.Attendees.EVENT_ID,
-                    CalendarContract.Attendees.ATTENDEE_NAME
-            };
-
-            String selection2 = CalendarContract.Attendees.EVENT_ID + "=?";
-            String[] selectionArgs2 = new String[] {id};
-            foundAttendee = false;
-
-            Cursor cursor2 = this.mContext.getContentResolver().query(
-                    CalendarContract.Attendees.CONTENT_URI,
-                    projection2,
-                    selection2,
-                    selectionArgs2,
-                    null);
-//            Log.d(this.LOG_TAG, ": doSearchCalendarEvents found " + cursor2.getCount() + " attendees for event id: " + id);
-
-            while (cursor2.moveToNext()) {
-                String attendee = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Attendees.ATTENDEE_NAME));
-
-                Log.d(this.LOG_TAG, ": doSearchCalendarEvents found attendee:" + attendee);
-
-                if (attendee.toLowerCase().contains(contactName)) {
-                    foundAttendee = true;
-                    break;
-                }
-            }
-            cursor2.close();
-            */
-
             String start = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.DTSTART));
             Date callDayTime = new Date(Long.valueOf(start));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -241,7 +213,7 @@ public abstract class EventRetriever extends AsyncTask<String, Event, Void>
         while (cursor.moveToNext()) {
             String id = cursor.getString(cursor.getColumnIndex(CalendarContract.Attendees.EVENT_ID));
             String attendee = cursor.getString(cursor.getColumnIndex(CalendarContract.Attendees.ATTENDEE_NAME));
-            String email = cursor.getString(cursor.getColumnIndex(CalendarContract.Attendees.ATTENDEE_NAME));
+            String email = cursor.getString(cursor.getColumnIndex(CalendarContract.Attendees.ATTENDEE_EMAIL));
 
             Log.d(this.LOG_TAG, ": doSearchCalendarAttendees found attendee: " + attendee);
 

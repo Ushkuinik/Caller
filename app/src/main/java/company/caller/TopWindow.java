@@ -169,23 +169,21 @@ public class TopWindow extends StandOutWindow {
     private void listContactEvents(final String number) {
         Log.d(this.LOG_TAG, ": listContactEvents");
 
-        String name = getContactName(number);
         Contact contact = getContactInfo(number);
+        contact.name = getContactName(number);
 
-/*
-        if ((name != null) && (!name.isEmpty())) {
-            setTitle(this.id, name);
+        if ((contact.name != null) && (!contact.name.isEmpty())) {
+            setTitle(this.id, contact.name);
         }
         else {
             setTitle(this.id, number);
         }
 
         PhoneDataRetriever retriever = new PhoneDataRetriever(this);
-        // TODO Pass name and number as SearchParams class members instead of array elements
-        retriever.execute(number, name);
+
+        retriever.execute(contact);
 
         this.createEventList(this.events);
-*/
     }
 
 
