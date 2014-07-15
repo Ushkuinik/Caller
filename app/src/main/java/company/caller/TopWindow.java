@@ -24,6 +24,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -56,12 +57,14 @@ public class TopWindow extends StandOutWindow {
 
                 Window window = getWindow(id);
 
-                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    Log.d(LOG_TAG, "LANDSCAPE, width: " + width + ", height: " + height);
-                    window.edit().setSize(width, height).commit();
-                } else {
-                    window.edit().setSize(width, height).commit();
-                    Log.d(LOG_TAG, "PORTRAIT, width: " + width + ", height: " + height);
+                if( (window != null) && (window.edit() != null)) {
+                    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        Log.d(LOG_TAG, "LANDSCAPE, width: " + width + ", height: " + height);
+                        window.edit().setSize(width, height).commit();
+                    } else {
+                        window.edit().setSize(width, height).commit();
+                        Log.d(LOG_TAG, "PORTRAIT, width: " + width + ", height: " + height);
+                    }
                 }
             }
         }
@@ -90,7 +93,7 @@ public class TopWindow extends StandOutWindow {
 
     @Override
     public int getAppIcon() {
-        return 0;
+        return R.drawable.ic_cross_gray;
     }
 
 
@@ -198,7 +201,6 @@ public class TopWindow extends StandOutWindow {
                 break;
         }
     }
-
 
 
 
