@@ -6,9 +6,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -68,22 +71,67 @@ public class ActivitySettings extends Activity {
                 }
         });
 
+        // retrieve preferences
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int prefCallLogDepth = preferences.getInt("prefCallLogDepth", 20);
+        boolean prefEnableCallLogEvents = preferences.getBoolean("prefEnableCallLogEvents", true);
+        boolean prefEnableCalendarEvents = preferences.getBoolean("prefEnableCalendarEvents", true);
+
         SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
+        seekCallLogDepth.setProgress(prefCallLogDepth);
+        seekCallLogDepth.setEnabled(prefEnableCallLogEvents);
 
+        TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
+        textCallLogDepthValue.setText(Integer.toString(prefCallLogDepth));
+        textCallLogDepthValue.setEnabled(prefEnableCallLogEvents);
 
+        findViewById(R.id.textCallLogDepthLabel).setEnabled(prefEnableCallLogEvents);
+
+        CheckBox checkEnableCallLogEvents = (CheckBox) findViewById(R.id.checkEnableCallLogEvents);
+        checkEnableCallLogEvents.setChecked(prefEnableCallLogEvents);
+
+        CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
+        checkEnableCalendarEvents.setChecked(prefEnableCalendarEvents);
+
+        // track changes of seekCallLogDepth (SeekBar)
         seekCallLogDepth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressChanged = 0;
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-                TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
-                textCallLogDepthValue.setText(Integer.toString(progress));
+                ((TextView) findViewById(R.id.textCallLogDepthValue)).setText(Integer.toString(progress));
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
+                // store value to preferences
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivitySettings.this);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("prefCallLogDepth", seekBar.getProgress());
+                editor.commit();
+            }
+        });
+
+        checkEnableCallLogEvents.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivitySettings.this);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("prefEnableCallLogEvents", isChecked);
+                editor.commit();
+                findViewById(R.id.textCallLogDepthValue).setEnabled(isChecked);
+                findViewById(R.id.textCallLogDepthLabel).setEnabled(isChecked);
+                findViewById(R.id.seekCallLogDepth).setEnabled(isChecked);
+            }
+        });
+
+        checkEnableCalendarEvents.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivitySettings.this);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("prefEnableCalendarEvents", isChecked);
+                editor.commit();
             }
         });
     }

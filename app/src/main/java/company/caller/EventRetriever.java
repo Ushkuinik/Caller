@@ -6,9 +6,11 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
 import android.util.Log;
@@ -47,25 +49,31 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
 
 		Contact contact = params[0];
 
-        // Search for call log first
-        for(String number: contact.numbers) {
-            this.doSearchPhoneLogs(number);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        boolean prefEnableCallLogEvents = preferences.getBoolean("prefEnableCallLogEvents", true);
+        boolean prefEnableCalendarEvents = preferences.getBoolean("prefEnableCalendarEvents", true);
+
+        if (prefEnableCallLogEvents) {
+            // Search for call log first
+            for (String number : contact.numbers) {
+                this.doSearchPhoneLogs(number);
+            }
         }
 
-        // Search for calendar events
-        ArrayList<String> searchStrings = new ArrayList<String>();
-        searchStrings.addAll(contact.numbers); // look for phone numbers
-        searchStrings.addAll(contact.emails);  // ... emails
-        if (contact.name != null)
-            searchStrings.add(contact.name);   // ... name
+        if (prefEnableCalendarEvents) {
+            // Search for calendar events
+            ArrayList<String> searchStrings = new ArrayList<String>();
+            searchStrings.addAll(contact.numbers); // look for phone numbers
+            searchStrings.addAll(contact.emails);  // ... emails
+            if (contact.name != null)
+                searchStrings.add(contact.name);   // ... name
 
-        this.doSearchCalendarEvents(searchStrings);
+            this.doSearchCalendarEvents(searchStrings);
 
-//        TimeUnit.SECONDS.sleep(2);
-
-        // Look for calendar events by attendees
-        for(String email: contact.emails) {
-            this.doSearchCalendarAttendees(email);
+            // Look for calendar events by attendees
+            for (String email : contact.emails) {
+                this.doSearchCalendarAttendees(email);
+            }
         }
 
 	    return null;
@@ -104,14 +112,26 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         Log.d(this.LOG_TAG, "doSearchPhoneLogs");
 
 		String[] projection = new String[] {
+                CallLog.Calls._ID,
                 CallLog.Calls.NUMBER,
                 CallLog.Calls.TYPE,
                 CallLog.Calls.DATE,
                 CallLog.Calls.DURATION
         };
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        int prefCallLogDepth = preferences.getInt("prefCallLogDepth", 0);
+
+        String sortOrder = null;
+        if (prefCallLogDepth != 0)
+            sortOrder = CallLog.Calls._ID + " ASC LIMIT '" + prefCallLogDepth + "'";
+
         Cursor cursor = this.mContext.getContentResolver().query(
-        		CallLog.Calls.CONTENT_URI, projection, "number='" + phoneNum + "'", null, null);
+                CallLog.Calls.CONTENT_URI,
+                projection,
+                "number='" + phoneNum + "'",
+                null,
+                sortOrder);
 
         while (cursor.moveToNext()) {
             String callType = cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE));

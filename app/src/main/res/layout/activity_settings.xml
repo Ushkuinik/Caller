@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp">
 
@@ -10,20 +10,46 @@
         android:layout_height="wrap_content"
         android:text="@string/strMainSwitch" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <TextView
+            android:id="@+id/labelEnableCallLog"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/checkEnableCallLogEvents"
+            android:gravity="center_vertical"
+            android:text="@string/strEnableCallLogEvents"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="16sp" />
+
+        <CheckBox
+            android:id="@+id/checkEnableCallLogEvents"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
+            android:gravity="center_vertical" />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginBottom="8dp"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/textCallLogDepthLabel"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
             android:gravity="center_vertical"
             android:text="@string/strCallLogDepthLabel"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textIsSelectable="false"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/textCallLogDepthValue"
@@ -31,21 +57,41 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical|center_horizontal"
             android:text="@string/strCallLogValueDefault"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="15sp" />
 
         <SeekBar
             android:id="@+id/seekCallLogDepth"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="20" />
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:max="20"
+            android:progress="20" />
     </LinearLayout>
 
-    <ToggleButton
-        android:id="@+id/toggleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="New ToggleButton" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <TextView
+            android:id="@+id/labelEnableCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/checkEnableCalendarEvents"
+            android:gravity="center_vertical"
+            android:text="@string/strEnableCalendarEvents"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="16sp" />
+
+        <CheckBox
+            android:id="@+id/checkEnableCalendarEvents"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
+            android:gravity="center_vertical" />
+    </RelativeLayout>
 
     <Button
         android:id="@+id/button"
