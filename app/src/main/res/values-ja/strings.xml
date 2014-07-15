@@ -5,12 +5,12 @@
     <string name="strMainSwitch">Enable Caller</string>
     <string name="title_activity_caller">Caller</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-    <string name="strNumber">Enter phone number</string>
+    <string name="action_settings">設定</string>
+    <string name="strNumber">電話番号を入力してください</string>
     <string name="strDefaultNumber">""</string>
     <string name="strCallLogDepthLabel">Call log depth: </string>
     <string name="strCallLogValueDefault">0</string>
-    <string name="strDurationIs">"Duration is "</string>
-    <string name="strSec">" sec"</string>
+    <string name="strDurationIs">会話時間</string>
+    <string name="strSec">秒</string>
 
 </resources>
