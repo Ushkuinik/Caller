@@ -4,7 +4,11 @@ import wei.mark.standout.StandOutWindow;
 import wei.mark.standout.constants.StandOutFlags;
 import wei.mark.standout.ui.Window;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
@@ -32,13 +36,50 @@ import java.util.Locale;
  */
 public class TopWindow extends StandOutWindow {
 
+    private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
+
     private final String LOG_TAG = this.getClass().toString();
     private View             view = null;
-    private int              id;
+    private int id;    // window id
+    public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent myIntent) {
 
+            if (myIntent.getAction().equals(BCAST_CONFIGCHANGED)) {
+
+                WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+                Display display = wm.getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                int width = size.x;
+                int height = size.y / 2;
+
+                Window window = getWindow(id);
+
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    Log.d(LOG_TAG, "LANDSCAPE, width: " + width + ", height: " + height);
+                    window.edit().setSize(width, height).commit();
+                } else {
+                    window.edit().setSize(width, height).commit();
+                    Log.d(LOG_TAG, "PORTRAIT, width: " + width + ", height: " + height);
+                }
+            }
+        }
+    };
     private ArrayList<Event> events = new ArrayList<Event>();
     private EventAdapter     adapter;
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        Log.d(this.LOG_TAG, "onCreate");
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BCAST_CONFIGCHANGED);
+        this.registerReceiver(mBroadcastReceiver, filter);
+
+    }
 
     @Override
     public String getAppName() {
@@ -56,7 +97,7 @@ public class TopWindow extends StandOutWindow {
 
     @Override
     public void createAndAttachView(final int id, final FrameLayout frame) {
-        Log.d(this.LOG_TAG, ": createAndAttachView");
+        Log.d(this.LOG_TAG, "createAndAttachView");
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         this.view = inflater.inflate(R.layout.top_window, frame, true);
@@ -79,7 +120,7 @@ public class TopWindow extends StandOutWindow {
         return new StandOutLayoutParams(
                 id,
                 width,    // width
-                height / 3 * 2,    // height
+                height / 2,    // height
                 StandOutLayoutParams.TOP,   // xpos
                 StandOutLayoutParams.LEFT);   // ypos
     }
@@ -99,13 +140,14 @@ public class TopWindow extends StandOutWindow {
                 | StandOutFlags.FLAG_DECORATION_CLOSE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_RESIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MAXIMIZE_DISABLE
-                | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
+//                | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
+//                | StandOutFlags.FLAG_BODY_MOVE_ENABLE
                 | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TOUCH
                 | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
-                | StandOutFlags.FLAG_WINDOW_EDGE_LIMITS_ENABLE
+//                | StandOutFlags.FLAG_WINDOW_EDGE_LIMITS_ENABLE // StandOutWindow incorrectly checks screen boundaries after phone rotated
                 | StandOutFlags.FLAG_FIX_COMPATIBILITY_ALL_DISABLE
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_ALL_DISABLE
-                | StandOutFlags.FLAG_ADD_FUNCTIONALITY_RESIZE_DISABLE
+//                | StandOutFlags.FLAG_ADD_FUNCTIONALITY_RESIZE_DISABLE
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_DROP_DOWN_DISABLE;
     }
 
@@ -131,7 +173,7 @@ public class TopWindow extends StandOutWindow {
     @Override
     public void onReceiveData(final int id, final int requestCode, final Bundle data,
                               final Class<? extends StandOutWindow> fromCls, final int fromId) {
-        Log.d(this.LOG_TAG, ": onReceiveData");
+        Log.d(this.LOG_TAG, "onReceiveData");
 
         switch (requestCode) {
             case CallDetectService.GOT_PHONE_NUMBER:
@@ -146,7 +188,7 @@ public class TopWindow extends StandOutWindow {
                 }
                 String number = data.getString("phoneNumber");
                 number = number.replace("-", "");
-                Log.d(this.LOG_TAG, ": onReceiveData(phoneNumber = " + number + ")");
+                Log.d(this.LOG_TAG, "onReceiveData(phoneNumber = " + number + ")");
 
                 this.listContactEvents(number);
                 break;
@@ -167,7 +209,7 @@ public class TopWindow extends StandOutWindow {
      *            phone number of incoming call
      */
     private void listContactEvents(final String number) {
-        Log.d(this.LOG_TAG, ": listContactEvents");
+        Log.d(this.LOG_TAG, "listContactEvents");
 
         Contact contact = getContactInfo(number);
         contact.name = getContactName(number);
@@ -196,7 +238,7 @@ public class TopWindow extends StandOutWindow {
      * @see EventAdapter
      */
     private void createEventList(final ArrayList<Event> events) {
-        Log.d(this.LOG_TAG, ": createEventList");
+        Log.d(this.LOG_TAG, "createEventList");
 
         ListView listRecords = (ListView) this.view.findViewById(R.id.listView);
         this.adapter = new EventAdapter(this, events);
@@ -216,7 +258,7 @@ public class TopWindow extends StandOutWindow {
      * @see ContactsContract
      */
     private String getContactName(final String number) {
-        Log.d(this.LOG_TAG, ": getContactName");
+        Log.d(this.LOG_TAG, "getContactName");
 
         String name = null;
 
@@ -233,9 +275,9 @@ public class TopWindow extends StandOutWindow {
         if(cursor != null) {
             if (cursor.moveToFirst()) {
                 name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-                Log.d(this.LOG_TAG, ": Contact name for number " + number + " is " + name);
+                Log.d(this.LOG_TAG, "ontact name for number " + number + " is " + name);
             } else {
-                Log.d(this.LOG_TAG, ": Contact not found for number " + number);
+                Log.d(this.LOG_TAG, "Contact not found for number " + number);
             }
             cursor.close();
         }
@@ -254,7 +296,7 @@ public class TopWindow extends StandOutWindow {
      * @see Contact
      */
     private Contact getContactInfo(final String _number) {
-        Log.d(this.LOG_TAG, ": getContactInfo");
+        Log.d(this.LOG_TAG, "getContactInfo");
 
         Contact contact = new Contact();
 
@@ -271,10 +313,10 @@ public class TopWindow extends StandOutWindow {
 
                 contact.id = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup._ID));
 
-                Log.d(this.LOG_TAG, ": Contact found. Id: " + id);
+                Log.d(this.LOG_TAG, "Contact found. Id: " + id);
             }
             else {
-                Log.d(this.LOG_TAG, ": Contact not found");
+                Log.d(this.LOG_TAG, "Contact not found");
                 return null;
             }
             cursor.close();
@@ -308,7 +350,7 @@ public class TopWindow extends StandOutWindow {
                     String data = cursor2.getString(cursor2.getColumnIndex(ContactsContract.Data.DATA1));
                     String mime = cursor2.getString(cursor2.getColumnIndex(ContactsContract.Data.MIMETYPE));
 
-                    Log.d(this.LOG_TAG, ": Data: data: " + data + ", mime = " + mime);
+                    Log.d(this.LOG_TAG, "Data: data: " + data + ", mime = " + mime);
 
                     if(mime.equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
                         // TODO Need to define number normalization rules (stripe '-', '+', '(', ')', etc.)
@@ -320,17 +362,11 @@ public class TopWindow extends StandOutWindow {
                 } while(cursor2.moveToNext());
             }
             else {
-                Log.d(this.LOG_TAG, ": Contact not found");
+                Log.d(this.LOG_TAG, "Contact not found");
             }
             cursor2.close();
         }
-/*
-        for(String number: contact.numbers)
-            Log.d(this.LOG_TAG, ": phone: " + number);
 
-        for(String email: contact.emails)
-            Log.d(this.LOG_TAG, ": email: " + email);
-*/
         return contact;
     }
 
@@ -344,15 +380,16 @@ public class TopWindow extends StandOutWindow {
 		public PhoneDataRetriever(final Context c)
         {
             super(c);
-            Log.d(this.LOG_TAG, ": PhoneDataRetriever");
+            Log.d(this.LOG_TAG, "PhoneDataRetriever");
         }
 
 		@Override
         void onNewEventFound(final Event event)
         {
-	        TopWindow.this.adapter.add(event);
+            TopWindow.this.adapter.add(event);
             ListView listRecords = (ListView) TopWindow.this.view.findViewById(R.id.listView);
-            listRecords.smoothScrollToPosition(TopWindow.this.adapter.getCount() - 1);
+            listRecords.setSelection(TopWindow.this.adapter.getCount() - 1);
+//          listRecords.smoothScrollToPosition(TopWindow.this.adapter.getCount() - 1);
         }
 
 		@Override

@@ -1,7 +1,6 @@
 package company.caller;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +51,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
         }
 
         Event event = getEvent(position);
-        Log.d(this.LOG_TAG, ": getView: event.desc: " + event.datetime + ", event.desc: " + event.description);
+//        Log.d(this.LOG_TAG, ": getView: event.desc: " + event.datetime + ", event.desc: " + event.description);
 
         ((TextView) view.findViewById(R.id.textDatetime)).setText(event.datetime);
         ((TextView) view.findViewById(R.id.textDescription)).setText(event.description);
