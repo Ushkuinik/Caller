@@ -24,7 +24,7 @@ import wei.mark.standout.StandOutWindow;
 
 
 /**
- *
+ * Settings screen of the Application
  *
  */
 public class ActivitySettings extends Activity {
@@ -34,6 +34,7 @@ public class ActivitySettings extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "onCreate");
 
         setContentView(R.layout.activity_settings);
 
@@ -64,6 +65,13 @@ public class ActivitySettings extends Activity {
 
 
         Button button = (Button) findViewById(R.id.button);
+        SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
+        TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
+        TextView textCallLogDepthLabel = (TextView) findViewById(R.id.textCallLogDepthLabel);
+        CheckBox checkEnableCallLogEvents = (CheckBox) findViewById(R.id.checkEnableCallLogEvents);
+        CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
+
+
         button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     createDialog();
@@ -77,20 +85,12 @@ public class ActivitySettings extends Activity {
         boolean prefEnableCallLogEvents = preferences.getBoolean("prefEnableCallLogEvents", true);
         boolean prefEnableCalendarEvents = preferences.getBoolean("prefEnableCalendarEvents", true);
 
-        SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
         seekCallLogDepth.setProgress(prefCallLogDepth);
         seekCallLogDepth.setEnabled(prefEnableCallLogEvents);
-
-        TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
         textCallLogDepthValue.setText(Integer.toString(prefCallLogDepth));
         textCallLogDepthValue.setEnabled(prefEnableCallLogEvents);
-
-        findViewById(R.id.textCallLogDepthLabel).setEnabled(prefEnableCallLogEvents);
-
-        CheckBox checkEnableCallLogEvents = (CheckBox) findViewById(R.id.checkEnableCallLogEvents);
+        textCallLogDepthLabel.setEnabled(prefEnableCallLogEvents);
         checkEnableCallLogEvents.setChecked(prefEnableCallLogEvents);
-
-        CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
         checkEnableCalendarEvents.setChecked(prefEnableCalendarEvents);
 
         // track changes of seekCallLogDepth (SeekBar)

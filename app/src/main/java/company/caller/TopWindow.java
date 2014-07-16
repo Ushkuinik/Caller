@@ -20,7 +20,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -107,6 +109,15 @@ public class TopWindow extends StandOutWindow {
         this.id = id;
         if(adapter != null)
             adapter.clear();
+
+        ImageButton buttonExit = (ImageButton) view.findViewById(R.id.buttonExit);
+        buttonExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeAll();
+            }
+        });
+
     }
 
 
@@ -139,11 +150,11 @@ public class TopWindow extends StandOutWindow {
      */
     @Override
     public int getFlags(final int id) {
-        return  super.getFlags(id) |  StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
+        int flags = StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
                 | StandOutFlags.FLAG_DECORATION_CLOSE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_RESIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MAXIMIZE_DISABLE
-//                | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
+                | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
 //                | StandOutFlags.FLAG_BODY_MOVE_ENABLE
                 | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TOUCH
                 | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
@@ -152,6 +163,10 @@ public class TopWindow extends StandOutWindow {
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_ALL_DISABLE
 //                | StandOutFlags.FLAG_ADD_FUNCTIONALITY_RESIZE_DISABLE
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_DROP_DOWN_DISABLE;
+
+        flags &= ~StandOutFlags.FLAG_DECORATION_SYSTEM; // switch off DECORATION_SYSTEM to disable window title
+        Log.d(this.LOG_TAG, "getFlags: " + flags);
+        return flags;
     }
 
 
