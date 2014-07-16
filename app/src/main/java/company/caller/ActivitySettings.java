@@ -11,20 +11,20 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Switch;
-import android.widget.Button;
-import android.view.View;
 import android.widget.TextView;
 
 import wei.mark.standout.StandOutWindow;
 
 
 /**
- *
+ * Settings screen of the Application
  *
  */
 public class ActivitySettings extends Activity {
@@ -34,6 +34,7 @@ public class ActivitySettings extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "onCreate");
 
         setContentView(R.layout.activity_settings);
 
@@ -64,6 +65,15 @@ public class ActivitySettings extends Activity {
 
 
         Button button = (Button) findViewById(R.id.button);
+        SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
+        SeekBar seekShutdownDelay = (SeekBar) findViewById(R.id.seekShutdownDelay);
+        TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
+        TextView textCallLogDepthLabel = (TextView) findViewById(R.id.textCallLogDepthLabel);
+        TextView textShutdownDelayValue = (TextView) findViewById(R.id.textShutdownDelayValue);
+        CheckBox checkEnableCallLogEvents = (CheckBox) findViewById(R.id.checkEnableCallLogEvents);
+        CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
+
+
         button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     createDialog();
@@ -74,29 +84,26 @@ public class ActivitySettings extends Activity {
         // retrieve preferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int prefCallLogDepth = preferences.getInt("prefCallLogDepth", 20);
+        int prefShutdownDelay = preferences.getInt("prefShutdownDelay", 0);
         boolean prefEnableCallLogEvents = preferences.getBoolean("prefEnableCallLogEvents", true);
         boolean prefEnableCalendarEvents = preferences.getBoolean("prefEnableCalendarEvents", true);
 
-        SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
         seekCallLogDepth.setProgress(prefCallLogDepth);
+        seekShutdownDelay.setProgress(prefShutdownDelay);
         seekCallLogDepth.setEnabled(prefEnableCallLogEvents);
 
-        TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
         textCallLogDepthValue.setText(Integer.toString(prefCallLogDepth));
         textCallLogDepthValue.setEnabled(prefEnableCallLogEvents);
+        textCallLogDepthLabel.setEnabled(prefEnableCallLogEvents);
+        textShutdownDelayValue.setText(Integer.toString(prefShutdownDelay));
 
-        findViewById(R.id.textCallLogDepthLabel).setEnabled(prefEnableCallLogEvents);
-
-        CheckBox checkEnableCallLogEvents = (CheckBox) findViewById(R.id.checkEnableCallLogEvents);
         checkEnableCallLogEvents.setChecked(prefEnableCallLogEvents);
-
-        CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
         checkEnableCalendarEvents.setChecked(prefEnableCalendarEvents);
 
         // track changes of seekCallLogDepth (SeekBar)
         seekCallLogDepth.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 ((TextView) findViewById(R.id.textCallLogDepthValue)).setText(Integer.toString(progress));
             }
 
@@ -108,6 +115,25 @@ public class ActivitySettings extends Activity {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivitySettings.this);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putInt("prefCallLogDepth", seekBar.getProgress());
+                editor.commit();
+            }
+        });
+
+        // track changes of seekShutdownDelay (SeekBar)
+        seekShutdownDelay.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+                ((TextView) findViewById(R.id.textShutdownDelayValue)).setText(Integer.toString(progress));
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // store value to preferences
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivitySettings.this);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("prefShutdownDelay", seekBar.getProgress());
                 editor.commit();
             }
         });

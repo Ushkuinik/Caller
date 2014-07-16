@@ -8,11 +8,13 @@
     <string name="action_settings">設定</string>
     <string name="strNumber">電話番号を入力してください</string>
     <string name="strDefaultNumber">""</string>
-    <string name="strCallLogDepthLabel">Call log depth: </string>
+    <string name="strCallLogDepthLabel">"Call log depth: "</string>
     <string name="strCallLogValueDefault">0</string>
     <string name="strDurationIs">会話時間</string>
     <string name="strSec">秒</string>
     <string name="strEnableCallLogEvents">List Call Log events</string>
     <string name="strEnableCalendarEvents">List Calendar events</string>
+    <string name="strShutdownDelayLabel">"Shutdown delay: "</string>
+    <string name="strShutdownDelayValueDefault">0</string>
 
 </resources>

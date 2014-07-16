@@ -3,8 +3,11 @@ package company.caller;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -79,7 +82,16 @@ public class CallDetectService extends Service {
                     break;
 
                 case TelephonyManager.CALL_STATE_IDLE:
-                    StandOutWindow.closeAll(context, TopWindow.class);
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    int prefEnableCallLogEvents = preferences.getInt("prefShutdownDelay", 0);
+
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            StandOutWindow.closeAll(context, TopWindow.class);
+                        }
+                    }, prefEnableCallLogEvents * 1000);
                     Log.d(LOG_TAG, "[CALL_STATE_IDLE]");
                     break;
 

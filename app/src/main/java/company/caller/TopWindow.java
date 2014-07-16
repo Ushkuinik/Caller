@@ -1,18 +1,17 @@
 package company.caller;
 
-import wei.mark.standout.StandOutWindow;
-import wei.mark.standout.constants.StandOutFlags;
-import wei.mark.standout.ui.Window;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.Display;
@@ -20,12 +19,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
+
+import wei.mark.standout.StandOutWindow;
+import wei.mark.standout.constants.StandOutFlags;
+import wei.mark.standout.ui.Window;
 
 /**
  * The Window, which will float over Call screen when call incomes.
@@ -40,7 +43,7 @@ public class TopWindow extends StandOutWindow {
     private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
 
     private final String LOG_TAG = this.getClass().toString();
-    private View             view = null;
+    private View view = null;
     private int id;    // window id
     public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -81,7 +84,6 @@ public class TopWindow extends StandOutWindow {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BCAST_CONFIGCHANGED);
         this.registerReceiver(mBroadcastReceiver, filter);
-
     }
 
     @Override
@@ -107,6 +109,24 @@ public class TopWindow extends StandOutWindow {
         this.id = id;
         if(adapter != null)
             adapter.clear();
+
+        ImageButton buttonExit = (ImageButton) view.findViewById(R.id.buttonExit);
+        buttonExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(TopWindow.this);
+                int prefEnableCallLogEvents = preferences.getInt("prefShutdownDelay", 0);
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        StandOutWindow.closeAll(TopWindow.this, TopWindow.class);
+                    }
+                }, prefEnableCallLogEvents * 1000);
+            }
+        });
+
     }
 
 
@@ -139,11 +159,11 @@ public class TopWindow extends StandOutWindow {
      */
     @Override
     public int getFlags(final int id) {
-        return  super.getFlags(id) |  StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
+        int flags = StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
                 | StandOutFlags.FLAG_DECORATION_CLOSE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_RESIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MAXIMIZE_DISABLE
-//                | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
+                | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
 //                | StandOutFlags.FLAG_BODY_MOVE_ENABLE
                 | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TOUCH
                 | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
@@ -152,6 +172,10 @@ public class TopWindow extends StandOutWindow {
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_ALL_DISABLE
 //                | StandOutFlags.FLAG_ADD_FUNCTIONALITY_RESIZE_DISABLE
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_DROP_DOWN_DISABLE;
+
+        flags &= ~StandOutFlags.FLAG_DECORATION_SYSTEM; // switch off DECORATION_SYSTEM to disable window title
+        Log.d(this.LOG_TAG, "getFlags: " + flags);
+        return flags;
     }
 
 
@@ -277,7 +301,7 @@ public class TopWindow extends StandOutWindow {
         if(cursor != null) {
             if (cursor.moveToFirst()) {
                 name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-                Log.d(this.LOG_TAG, "ontact name for number " + number + " is " + name);
+                Log.d(this.LOG_TAG, "Contact name for number " + number + " is " + name);
             } else {
                 Log.d(this.LOG_TAG, "Contact not found for number " + number);
             }
@@ -374,7 +398,9 @@ public class TopWindow extends StandOutWindow {
 
 
 
-
+    /**
+     *
+     */
     private class PhoneDataRetriever extends EventRetriever
 	{
         private final String LOG_TAG = this.getClass().toString();
