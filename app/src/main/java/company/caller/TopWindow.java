@@ -1,18 +1,17 @@
 package company.caller;
 
-import wei.mark.standout.StandOutWindow;
-import wei.mark.standout.constants.StandOutFlags;
-import wei.mark.standout.ui.Window;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.Display;
@@ -22,12 +21,14 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
+
+import wei.mark.standout.StandOutWindow;
+import wei.mark.standout.constants.StandOutFlags;
+import wei.mark.standout.ui.Window;
 
 /**
  * The Window, which will float over Call screen when call incomes.
@@ -42,7 +43,7 @@ public class TopWindow extends StandOutWindow {
     private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
 
     private final String LOG_TAG = this.getClass().toString();
-    private View             view = null;
+    private View view = null;
     private int id;    // window id
     public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -83,7 +84,6 @@ public class TopWindow extends StandOutWindow {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BCAST_CONFIGCHANGED);
         this.registerReceiver(mBroadcastReceiver, filter);
-
     }
 
     @Override
@@ -114,7 +114,16 @@ public class TopWindow extends StandOutWindow {
         buttonExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                closeAll();
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(TopWindow.this);
+                int prefEnableCallLogEvents = preferences.getInt("prefShutdownDelay", 0);
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        StandOutWindow.closeAll(TopWindow.this, TopWindow.class);
+                    }
+                }, prefEnableCallLogEvents * 1000);
             }
         });
 
@@ -292,7 +301,7 @@ public class TopWindow extends StandOutWindow {
         if(cursor != null) {
             if (cursor.moveToFirst()) {
                 name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-                Log.d(this.LOG_TAG, "ontact name for number " + number + " is " + name);
+                Log.d(this.LOG_TAG, "Contact name for number " + number + " is " + name);
             } else {
                 Log.d(this.LOG_TAG, "Contact not found for number " + number);
             }
@@ -389,7 +398,9 @@ public class TopWindow extends StandOutWindow {
 
 
 
-
+    /**
+     *
+     */
     private class PhoneDataRetriever extends EventRetriever
 	{
         private final String LOG_TAG = this.getClass().toString();

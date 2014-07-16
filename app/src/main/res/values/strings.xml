@@ -8,11 +8,13 @@
     <string name="action_settings">Settings</string>
     <string name="strNumber">Enter phone number</string>
     <string name="strDefaultNumber">""</string>
-    <string name="strCallLogDepthLabel">Call log depth: </string>
+    <string name="strCallLogDepthLabel">"Call log depth: "</string>
     <string name="strCallLogValueDefault">0</string>
     <string name="strDurationIs">"Duration is "</string>
     <string name="strSec">" sec"</string>
     <string name="strEnableCallLogEvents">List Call Log events</string>
     <string name="strEnableCalendarEvents">List Calendar events</string>
+    <string name="strShutdownDelayLabel">"Shutdown delay: "</string>
+    <string name="strShutdownDelayValueDefault">0</string>
 
 </resources>

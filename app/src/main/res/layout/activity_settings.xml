@@ -55,10 +55,11 @@
             android:id="@+id/textCallLogDepthValue"
             android:layout_width="30dp"
             android:layout_height="match_parent"
-            android:gravity="center_vertical|center_horizontal"
+            android:gravity="center"
             android:text="@string/strCallLogValueDefault"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:layout_gravity="center"/>
 
         <SeekBar
             android:id="@+id/seekCallLogDepth"
@@ -92,6 +93,39 @@
             android:layout_gravity="right"
             android:gravity="center_vertical" />
     </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/strShutdownDelayLabel"
+            android:id="@+id/textShutdownDelayLabel"
+            android:layout_gravity="left|center_vertical"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/textShutdownDelayValue"
+            android:text="@string/strShutdownDelayValueDefault"
+            android:textSize="16sp"
+            android:gravity="center"/>
+
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekShutdownDelay"
+            android:layout_weight="1"
+            android:max="10"
+            android:layout_gravity="center"
+            android:progress="0"/>
+    </LinearLayout>
 
     <Button
         android:id="@+id/button"
