@@ -1,7 +1,7 @@
 package company.caller;
 
 /**
- *
+ * Event class
  */
 public class Event {
     public EventType type;
