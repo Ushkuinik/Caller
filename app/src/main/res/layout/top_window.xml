@@ -11,7 +11,10 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#001122">
+        android:background="#dd001122"
+        android:divider="@drawable/vertical_divider"
+        android:dividerPadding="10dip"
+        android:showDividers="middle" >
 
         <ImageButton
             android:layout_width="46dp"
