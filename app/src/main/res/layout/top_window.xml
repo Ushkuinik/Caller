@@ -6,12 +6,46 @@
     android:background="#dd001122"
     android:baselineAligned="false">
 
-    <ImageButton
-        android:layout_width="53dp"
-        android:layout_height="47dp"
-        android:id="@+id/buttonExit"
-        android:layout_gravity="left|center_horizontal"
-        android:src="@drawable/ic_cross_gray"/>
+    <LinearLayout
+        android:id="@+id/layoutTitle"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#001122">
+
+        <ImageButton
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:id="@+id/btnQuit"
+            android:src="@drawable/ic_action_remove_holo_dark"
+            android:background="@drawable/image_button" />
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:textSize="20sp"
+            android:textColor="@android:color/primary_text_dark"
+            android:gravity="center_vertical"
+            android:background="@drawable/image_button"
+            android:padding="4dp"/>
+
+        <ImageButton
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:id="@+id/btnCalendar"
+            android:src="@drawable/ic_action_calendar_holo_dark"
+            android:background="@drawable/image_button" />
+
+        <ImageButton
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:id="@+id/btnSettings"
+            android:src="@drawable/ic_action_overflow_holo_dark"
+            android:background="@drawable/image_button" />
+    </LinearLayout>
 
     <ListView
         android:layout_width="match_parent"

@@ -16,5 +16,8 @@
     <string name="strEnableCalendarEvents">List Calendar events</string>
     <string name="strShutdownDelayLabel">"Shutdown delay: "</string>
     <string name="strShutdownDelayValueDefault">0</string>
+    <string name="strActionQuit">Quit</string>
+    <string name="strActionCalendar">Calendar</string>
+    <string name="strActionSettings">Settings</string>
 
 </resources>
