@@ -66,7 +66,8 @@ public class ActivitySettings extends Activity {
         });
 
 
-        Button button = (Button) findViewById(R.id.button);
+        Button btnWindow = (Button) findViewById(R.id.btnWindow);
+        Button btnCalendar = (Button) findViewById(R.id.btnCalendar1);
         SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
         SeekBar seekShutdownDelay = (SeekBar) findViewById(R.id.seekShutdownDelay);
         TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
@@ -76,11 +77,16 @@ public class ActivitySettings extends Activity {
         CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
 
 
-        button.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    createDialog();
-
-                }
+        btnWindow.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                createDialog();
+            }
+        });
+        btnCalendar.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent i = new Intent(getBaseContext(), ActivityCalendar.class);
+                startActivity(i);
+            }
         });
 
         // retrieve preferences

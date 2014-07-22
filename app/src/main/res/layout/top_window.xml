@@ -13,7 +13,7 @@
         android:layout_height="48dp"
         android:background="#dd001122"
         android:divider="@drawable/vertical_divider"
-        android:dividerPadding="10dip"
+        android:dividerPadding="14dip"
         android:showDividers="middle" >
 
         <ImageButton

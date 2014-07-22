@@ -19,5 +19,10 @@
     <string name="strActionQuit">Quit</string>
     <string name="strActionCalendar">Calendar</string>
     <string name="strActionSettings">Settings</string>
+    <string name="pref_syncConnectionTypes_default">Type1</string>
+    <string name="event_date">Date</string>
+    <string name="event_time">Time</string>
+    <string name="action_save">Save</string>
+    <string name="calendar_activity_title">New event</string>
 
 </resources>

@@ -1,5 +1,6 @@
 package company.caller;
 
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,8 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -148,6 +151,10 @@ public class TopWindow extends StandOutWindow {
 
             @Override
             public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(), ActivitySettings.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+                TopWindow.super.hide(id);
                 Toast.makeText(getApplicationContext(), "Settings was pressed!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -157,6 +164,10 @@ public class TopWindow extends StandOutWindow {
 
             @Override
             public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(), ActivityCalendar.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                TopWindow.super.close(id);
+                startActivity(i);
                 Toast.makeText(getApplicationContext(), "Calendar was pressed!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -205,6 +216,7 @@ public class TopWindow extends StandOutWindow {
                 | StandOutFlags.FLAG_DECORATION_RESIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MAXIMIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
+                | StandOutFlags.FLAG_WINDOW_HIDE_ENABLE
 //                | StandOutFlags.FLAG_BODY_MOVE_ENABLE
 //                | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TOUCH
 //                | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
@@ -217,6 +229,71 @@ public class TopWindow extends StandOutWindow {
         flags &= ~StandOutFlags.FLAG_DECORATION_SYSTEM; // switch off DECORATION_SYSTEM to disable window title
         Log.d(this.LOG_TAG, "getFlags: " + flags);
         return flags;
+    }
+
+
+
+    @Override
+    public String getPersistentNotificationTitle(int id) {
+        String s = "";
+
+        if(adapter != null)
+            s = " found " + adapter.getCount() + "events";
+        return getAppName() + s;
+    }
+
+    @Override
+    public String getPersistentNotificationMessage(int id) {
+        return getAppName() + " is looking for events";
+    }
+
+    @Override
+    public Intent getPersistentNotificationIntent(int id) {
+        return null; //StandOutWindow.getShowIntent(this, getClass(), id);
+    }
+
+    @Override
+    public Notification getPersistentNotification(int id) {
+        return super.getPersistentNotification(id);
+    }
+
+    @Override
+    public int getHiddenIcon() {
+        return android.R.drawable.ic_menu_info_details;
+    }
+
+    @Override
+    public String getHiddenNotificationTitle(int id) {
+        return getAppName() + " Hidden123";
+    }
+
+    @Override
+    public String getHiddenNotificationMessage(int id) {
+        return "Click to restore #" + id;
+    }
+
+    // return an Intent that restores the MultiWindow
+    @Override
+    public Intent getHiddenNotificationIntent(int id) {
+        return StandOutWindow.getShowIntent(this, getClass(), id);
+    }
+
+    @Override
+    public Animation getShowAnimation(int id) {
+        if (isExistingId(id)) {
+            // restore
+            return AnimationUtils.loadAnimation(this,
+                    android.R.anim.slide_in_left);
+        } else {
+            // show
+            return super.getShowAnimation(id);
+        }
+    }
+
+    @Override
+    public Animation getHideAnimation(int id) {
+        return AnimationUtils.loadAnimation(this,
+                android.R.anim.slide_out_right);
     }
 
 

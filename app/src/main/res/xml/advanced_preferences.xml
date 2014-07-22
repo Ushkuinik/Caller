@@ -1,0 +1,46 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Storage">
+
+        <ListPreference
+            android:key="list_calendar"
+            android:title="Calendar"
+            android:summary="Select calendar"
+            android:dialogTitle="Select calendar" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="What">
+
+        <EditTextPreference
+            android:key="event_title"
+            android:title="Title"
+            android:summary="Event (Caller)"
+            android:dialogTitle="Event title" />
+
+        <EditTextPreference
+            android:key="event_description"
+            android:title="Description"
+            android:summary="Automatic event via Caller"
+            android:dialogTitle="Event description" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="When">
+
+        <company.caller.PreferenceDate
+            android:key="event_date"
+            android:title="@string/event_date"
+            android:defaultValue="1991.01.01" />
+
+        <company.caller.PreferenceTime
+            android:key="event_time"
+            android:title="@string/event_time"
+            android:defaultValue="15:00" />
+
+    </PreferenceCategory>
+</PreferenceScreen>
