@@ -450,7 +450,7 @@ public class TopWindow extends StandOutWindow {
     private Contact getContactInfo(final String _number) {
         Log.d(this.LOG_TAG, "getContactInfo");
 
-        Contact contact = new Contact();
+        Contact contact = new Contact(_number);
 
         // 1. Get contact id
         String[] projection = new String[] {
@@ -497,11 +497,18 @@ public class TopWindow extends StandOutWindow {
                             Log.d(this.LOG_TAG, "Data: data: " + data + ", mime = " + mime);
 
                             if(mime.equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
-                                // TODO Need to define number normalization rules (stripe '-', '+', '(', ')', etc.)
-                                contact.numbers.add(data.replace("-", ""));
-                                contact.numbers.add(data.replace("+7", "8"));
-                                contact.numbers.add(data.replace("(", ""));
-                                contact.numbers.add(data.replace(")", ""));
+                                // TODO Need to define number normalization rules (stripe ' ', '-', '+', '(', ')', etc.)
+                                data = data.replace(" ", "");
+                                data = data.replace("-", "");
+                                data = data.replace("+7", "");
+                                data = data.replace("(", "");
+                                data = data.replace(")", "");
+                                if(data.equals(contact.getIncomingNumber())) {
+                                    Log.d(this.LOG_TAG, "Skipped number. it is same as incomingNumber");
+                                }
+                                else
+                                    Log.d(this.LOG_TAG, "Added");
+                                    contact.numbers.add(data);
                             }
                             else if(mime.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
                                 contact.emails.add(data.toLowerCase());

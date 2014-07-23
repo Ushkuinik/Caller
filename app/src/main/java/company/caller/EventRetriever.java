@@ -53,6 +53,14 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         boolean prefEnableCallLogEvents = preferences.getBoolean("prefEnableCallLogEvents", true);
         boolean prefEnableCalendarEvents = preferences.getBoolean("prefEnableCalendarEvents", true);
 
+        // store Contact info (number, name, email) into preferences to be used by PreferenceActivityNewEvent
+        // these data will be stored until the next call is coming in
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("prefPhoneNumber", contact.getIncomingNumber());
+        editor.putString("prefContactName", contact.name); // rewrite with null if no name
+        editor.putString("prefContactEmail", contact.emails.get(0)); // rewrite with null if no emails
+        editor.commit();
+
         if (prefEnableCallLogEvents) {
             // Search for call log first
             for (String number : contact.numbers) {
@@ -82,7 +90,7 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
 	@Override
 	protected void onProgressUpdate(final Event... values)
 	{
-        Log.d(this.LOG_TAG, ": onProgressUpdate");
+        Log.d(this.LOG_TAG, "onProgressUpdate");
         super.onProgressUpdate(values);
 
 	    if ((values != null) && (values[0] != null))

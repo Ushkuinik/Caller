@@ -28,10 +28,24 @@ public class PreferenceFragmentNewEvent extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     final String LOG_TAG = this.getClass().toString();
 
+    private String mNumber;
+    private String mName;
+    private String mEmail;
+
     Context mContext = null;
 
     public PreferenceFragmentNewEvent() {
         Log.d(this.LOG_TAG, "PreferenceFragmentNewEvent");
+    }
+
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        Log.d(this.LOG_TAG, "setArguments");
+
+        mNumber = args.getString("number");
+        mName = args.getString("name");
+        mEmail = args.getString("email");
     }
 
     @Override
@@ -45,6 +59,12 @@ public class PreferenceFragmentNewEvent extends PreferenceFragment
         // populate Calendar list on creation
         final ListPreference listCalendar = (ListPreference) findPreference("list_calendar");
         setListPreferenceData(listCalendar);
+
+        if((mEmail != null) && (mName != null)) {
+            findPreference("event_description").setSummary("Event related to " + mName + ".");
+        } else if(mName == null) {
+            findPreference("event_description").setSummary("Event related to " + mNumber + ".");
+        }
 
         initSummary(getPreferenceScreen());
     }
