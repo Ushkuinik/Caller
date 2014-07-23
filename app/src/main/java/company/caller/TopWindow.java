@@ -1,5 +1,6 @@
 package company.caller;
 
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,9 +19,11 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -45,6 +48,10 @@ public class TopWindow extends StandOutWindow {
     private final String LOG_TAG = this.getClass().toString();
     private View view = null;
     private int id;    // window id
+
+    private ArrayList<Event> events = new ArrayList<Event>();
+    private EventAdapter     adapter;
+
     public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent myIntent) {
@@ -64,16 +71,17 @@ public class TopWindow extends StandOutWindow {
                     if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                         Log.d(LOG_TAG, "LANDSCAPE, width: " + width + ", height: " + height);
                         window.edit().setSize(width, height).commit();
-                    } else {
-                        window.edit().setSize(width, height).commit();
+                    }
+                    else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                         Log.d(LOG_TAG, "PORTRAIT, width: " + width + ", height: " + height);
+                        window.edit().setSize(width, height).commit();
                     }
                 }
             }
         }
     };
-    private ArrayList<Event> events = new ArrayList<Event>();
-    private EventAdapter     adapter;
+
+
 
     @Override
     public void onCreate() {
@@ -85,6 +93,8 @@ public class TopWindow extends StandOutWindow {
         filter.addAction(BCAST_CONFIGCHANGED);
         this.registerReceiver(mBroadcastReceiver, filter);
     }
+
+
 
     @Override
     public String getAppName() {
@@ -99,21 +109,29 @@ public class TopWindow extends StandOutWindow {
     }
 
 
-
+    /**
+     *
+     * @param id
+     *            The id representing the window.
+     * @param frame - body frame to be filled by custom content
+     */
     @Override
     public void createAndAttachView(final int id, final FrameLayout frame) {
         Log.d(this.LOG_TAG, "createAndAttachView");
 
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        this.view = inflater.inflate(R.layout.top_window, frame, true);
+        //LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        this.view = layoutInflater.inflate(R.layout.top_window, frame, true);
         this.id = id;
+
         if(adapter != null)
             adapter.clear();
 
-        ImageButton buttonExit = (ImageButton) view.findViewById(R.id.buttonExit);
-        buttonExit.setOnClickListener(new View.OnClickListener() {
+        View btnQuit = view.findViewById(R.id.btnQuit);
+        btnQuit.setOnClickListener(new View.OnClickListener() {
+
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(TopWindow.this);
                 int prefEnableCallLogEvents = preferences.getInt("prefShutdownDelay", 0);
 
@@ -127,6 +145,43 @@ public class TopWindow extends StandOutWindow {
             }
         });
 
+
+        View btnSettings = view.findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(), ActivitySettings.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+
+                TopWindow.super.close(id);
+                Toast.makeText(getApplicationContext(), "Settings was pressed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        View btnCalendar = view.findViewById(R.id.btnCalendar);
+        btnCalendar.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getBaseContext(), PreferenceActivityNewEvent.class);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+
+                TopWindow.super.close(id);
+                Toast.makeText(getApplicationContext(), "Calendar was pressed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        View txtTitle = view.findViewById(R.id.txtTitle);
+        txtTitle.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Title was pressed!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 
@@ -159,14 +214,14 @@ public class TopWindow extends StandOutWindow {
      */
     @Override
     public int getFlags(final int id) {
-        int flags = StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
-                | StandOutFlags.FLAG_DECORATION_CLOSE_DISABLE
+        int flags = StandOutFlags.FLAG_DECORATION_CLOSE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_RESIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MAXIMIZE_DISABLE
                 | StandOutFlags.FLAG_DECORATION_MOVE_DISABLE
+                | StandOutFlags.FLAG_WINDOW_HIDE_ENABLE
 //                | StandOutFlags.FLAG_BODY_MOVE_ENABLE
-                | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TOUCH
-                | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
+//                | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TOUCH
+//                | StandOutFlags.FLAG_WINDOW_BRING_TO_FRONT_ON_TAP
 //                | StandOutFlags.FLAG_WINDOW_EDGE_LIMITS_ENABLE // StandOutWindow incorrectly checks screen boundaries after phone rotated
                 | StandOutFlags.FLAG_FIX_COMPATIBILITY_ALL_DISABLE
                 | StandOutFlags.FLAG_ADD_FUNCTIONALITY_ALL_DISABLE
@@ -176,6 +231,71 @@ public class TopWindow extends StandOutWindow {
         flags &= ~StandOutFlags.FLAG_DECORATION_SYSTEM; // switch off DECORATION_SYSTEM to disable window title
         Log.d(this.LOG_TAG, "getFlags: " + flags);
         return flags;
+    }
+
+
+
+    @Override
+    public String getPersistentNotificationTitle(int id) {
+        String s = "";
+
+        if(adapter != null)
+            s = " found " + adapter.getCount() + "events";
+        return getAppName() + s;
+    }
+
+    @Override
+    public String getPersistentNotificationMessage(int id) {
+        return getAppName() + " is looking for events";
+    }
+
+    @Override
+    public Intent getPersistentNotificationIntent(int id) {
+        return null; //StandOutWindow.getShowIntent(this, getClass(), id);
+    }
+
+    @Override
+    public Notification getPersistentNotification(int id) {
+        return super.getPersistentNotification(id);
+    }
+
+    @Override
+    public int getHiddenIcon() {
+        return android.R.drawable.ic_menu_info_details;
+    }
+
+    @Override
+    public String getHiddenNotificationTitle(int id) {
+        return getAppName() + " Hidden123";
+    }
+
+    @Override
+    public String getHiddenNotificationMessage(int id) {
+        return "Click to restore #" + id;
+    }
+
+    // return an Intent that restores the MultiWindow
+    @Override
+    public Intent getHiddenNotificationIntent(int id) {
+        return StandOutWindow.getShowIntent(this, getClass(), id);
+    }
+
+    @Override
+    public Animation getShowAnimation(int id) {
+        if (isExistingId(id)) {
+            // restore
+            return AnimationUtils.loadAnimation(this,
+                    android.R.anim.slide_in_left);
+        } else {
+            // show
+            return super.getShowAnimation(id);
+        }
+    }
+
+    @Override
+    public Animation getHideAnimation(int id) {
+        return AnimationUtils.loadAnimation(this,
+                android.R.anim.slide_out_right);
     }
 
 
@@ -238,13 +358,14 @@ public class TopWindow extends StandOutWindow {
         Log.d(this.LOG_TAG, "listContactEvents");
 
         Contact contact = getContactInfo(number);
+
         contact.name = getContactName(number);
 
         if ((contact.name != null) && (!contact.name.isEmpty())) {
-            setTitle(this.id, contact.name);
+            setTitle(contact.name);
         }
         else {
-            setTitle(this.id, number);
+            setTitle(number);
         }
 
         PhoneDataRetriever retriever = new PhoneDataRetriever(this);
@@ -252,6 +373,13 @@ public class TopWindow extends StandOutWindow {
         retriever.execute(contact);
 
         this.createEventList(this.events);
+    }
+
+
+
+    public void setTitle(final String _title)
+    {
+        ((TextView)view.findViewById(R.id.txtTitle)).setText(_title);
     }
 
 
@@ -324,7 +452,7 @@ public class TopWindow extends StandOutWindow {
     private Contact getContactInfo(final String _number) {
         Log.d(this.LOG_TAG, "getContactInfo");
 
-        Contact contact = new Contact();
+        Contact contact = new Contact(_number);
 
         // 1. Get contact id
         String[] projection = new String[] {
@@ -340,57 +468,65 @@ public class TopWindow extends StandOutWindow {
                 contact.id = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup._ID));
 
                 Log.d(this.LOG_TAG, "Contact found. Id: " + id);
+
+                // 2. Get all phones and emails, related to this contact id
+                String[] projection2 = new String[] {
+                        ContactsContract.Data._ID,
+                        ContactsContract.Data.DATA1,
+                        ContactsContract.Data.MIMETYPE
+
+                };
+
+                String select2 = ContactsContract.Data.CONTACT_ID + "=?" + " AND ("
+                        + ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "' OR "
+                        + ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE + "')";
+
+                String [] selectArgs2 = new String[] {contact.id};
+
+                Cursor cursor2 = getContentResolver().query(
+                        ContactsContract.Data.CONTENT_URI,
+                        projection2,
+                        select2,
+                        selectArgs2,
+                        null);
+
+                if(cursor2 != null) {
+                    if (cursor2.moveToFirst()) {
+                        do {
+                            String data = cursor2.getString(cursor2.getColumnIndex(ContactsContract.Data.DATA1));
+                            String mime = cursor2.getString(cursor2.getColumnIndex(ContactsContract.Data.MIMETYPE));
+
+                            Log.d(this.LOG_TAG, "Data: data: " + data + ", mime = " + mime);
+
+                            if(mime.equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
+                                // TODO Need to define number normalization rules (stripe ' ', '-', '+', '(', ')', etc.)
+                                data = data.replace(" ", "");
+                                data = data.replace("-", "");
+                                data = data.replace("+7", "");
+                                data = data.replace("(", "");
+                                data = data.replace(")", "");
+                                if(data.equals(contact.getIncomingNumber())) {
+                                    Log.d(this.LOG_TAG, "Skipped number. it is same as incomingNumber");
+                                }
+                                else
+                                    Log.d(this.LOG_TAG, "Added");
+                                    contact.numbers.add(data);
+                            }
+                            else if(mime.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
+                                contact.emails.add(data.toLowerCase());
+                            }
+                        } while(cursor2.moveToNext());
+                    }
+                    else {
+                        Log.d(this.LOG_TAG, "Contact not found");
+                    }
+                    cursor2.close();
+                }
             }
             else {
                 Log.d(this.LOG_TAG, "Contact not found");
-                return null;
             }
             cursor.close();
-        }
-
-        // 2. Get all phones and emails, related to this contact id
-
-        String[] projection2 = new String[] {
-                ContactsContract.Data._ID,
-                ContactsContract.Data.DATA1,
-                ContactsContract.Data.MIMETYPE
-
-        };
-
-        String select2 = ContactsContract.Data.CONTACT_ID + "=?" + " AND ("
-                + ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "' OR "
-                + ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE + "')";
-
-        String [] selectArgs2 = new String[] {contact.id};
-
-        Cursor cursor2 = getContentResolver().query(
-                ContactsContract.Data.CONTENT_URI,
-                projection2,
-                select2,
-                selectArgs2,
-                null);
-
-        if(cursor2 != null) {
-            if (cursor2.moveToFirst()) {
-                do {
-                    String data = cursor2.getString(cursor2.getColumnIndex(ContactsContract.Data.DATA1));
-                    String mime = cursor2.getString(cursor2.getColumnIndex(ContactsContract.Data.MIMETYPE));
-
-                    Log.d(this.LOG_TAG, "Data: data: " + data + ", mime = " + mime);
-
-                    if(mime.equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
-                        // TODO Need to define number normalization rules (stripe '-', '+', '(', ')', etc.)
-                        contact.numbers.add(data.replace("-", ""));
-                    }
-                    else if(mime.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
-                        contact.emails.add(data.toLowerCase());
-                    }
-                } while(cursor2.moveToNext());
-            }
-            else {
-                Log.d(this.LOG_TAG, "Contact not found");
-            }
-            cursor2.close();
         }
 
         return contact;
@@ -430,6 +566,9 @@ public class TopWindow extends StandOutWindow {
         void onSearchFinished()
         {
 	        // TODO Hide infinite progress
+            // Close window if no events were found
+            if(TopWindow.this.adapter.getCount() == 0)
+                close(TopWindow.this.id);
         }
 	}
 }

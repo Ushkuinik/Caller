@@ -20,7 +20,7 @@ import wei.mark.standout.StandOutWindow;
  */
 public class CallDetectService extends Service {
     public static final int GOT_PHONE_NUMBER = 0;
-    final String LOG_TAG = "CallDetectService";
+    final String LOG_TAG = this.getClass().toString();
     private TelephonyManager tm;
     private CallStateListener callStateListener;
 

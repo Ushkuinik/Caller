@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class Contact {
 
-
+    private final int INDEX_INCOMING_NUMBER = 0;
     /**
      * Displayed contacts name
      */
@@ -25,8 +25,20 @@ public class Contact {
      */
     ArrayList<String> emails;
 
-    Contact() {
+
+    /**
+     *
+     * @param _number incoming number. It will always be the first in the array
+     */
+    Contact(String _number) {
+        // TODO: If _number is invalid, throw exception
         numbers = new ArrayList<String>();
         emails = new ArrayList<String>();
+        numbers.add(_number);
     }
+
+    public String getIncomingNumber() {
+        return numbers.get(INDEX_INCOMING_NUMBER);
+    }
+
 }

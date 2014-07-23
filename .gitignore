@@ -10,3 +10,4 @@
 *.jar
 *.class
 *.iml
+.idea/libraries/*.xml
