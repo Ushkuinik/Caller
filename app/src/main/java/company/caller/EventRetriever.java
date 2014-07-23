@@ -322,7 +322,8 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
                     desc = (desc == null) ? "" : desc;
 
                     Date callDayTime = new Date(Long.valueOf(start));
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+
+                    SimpleDateFormat formatter = new SimpleDateFormat(mContext.getString(R.string.datetime_format));
 
                     datetime = formatter.format(callDayTime);
                     description = title + " // " + desc;

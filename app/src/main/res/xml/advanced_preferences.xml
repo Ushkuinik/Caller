@@ -35,7 +35,7 @@
         <company.caller.PreferenceDate
             android:key="event_date"
             android:title="@string/event_date"
-            android:defaultValue="1991.01.01" />
+            android:defaultValue="2015.01.01" />
 
         <company.caller.PreferenceTime
             android:key="event_time"

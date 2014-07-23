@@ -15,7 +15,9 @@ import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,12 +110,43 @@ public class PreferenceFragmentNewEvent extends PreferenceFragment
 
         if (_preference instanceof ListPreference) {
             ListPreference p = (ListPreference) _preference;
-            _preference.setSummary(p.getEntry());
+            String summary = (p.getEntry() != null) ? (String) p.getEntry() : (String) p.getSummary();
+            _preference.setSummary(summary);
+            Log.d(this.LOG_TAG, "updatePrefSummary, list summary: " + summary);
         }
         else if (_preference instanceof EditTextPreference) {
             EditTextPreference p = (EditTextPreference) _preference;
-            _preference.setSummary(p.getText());
+            String summary = (p.getText() != null) ? p.getText() : (String) p.getSummary();
+            _preference.setSummary(summary);
+            Log.d(this.LOG_TAG, "updatePrefSummary,text  summary:　" + summary);
         }
+        else if (_preference instanceof PreferenceDate) {
+            PreferenceDate p = (PreferenceDate) _preference;
+
+            SimpleDateFormat formatter = new SimpleDateFormat(getResources().getString(R.string.date_format));
+            String summary = formatter.format(new Date(p.getDate().getTimeInMillis()));
+            _preference.setSummary(summary);
+            Log.d(this.LOG_TAG, "updatePrefSummary, date summary:　" + summary);
+        }
+        else if (_preference instanceof PreferenceTime) {
+            PreferenceTime p = (PreferenceTime) _preference;
+
+            SimpleDateFormat formatter = new SimpleDateFormat(getResources().getString(R.string.time_format));
+            String summary = formatter.format(new Date(p.getTime().getTimeInMillis()));
+            _preference.setSummary(summary);
+            Log.d(this.LOG_TAG, "updatePrefSummary, time summary:　" + summary);
+        }
+    }
+
+
+    /**
+     *
+     */
+    public void clearPreferences() {
+        Log.d(this.LOG_TAG, "clearPreferences");
+
+        SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+        sharedPreferences.edit().clear().commit();
     }
 
 

@@ -39,7 +39,7 @@ public class ActivityCalendar extends Activity {
         Button btnPref = (Button) findViewById(R.id.btnPref);
         btnPref.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                Intent intent = new Intent(getBaseContext(), PrefCalendar.class);
+                Intent intent = new Intent(getBaseContext(), PreferenceActivityNewEvent.class);
                 startActivity(intent);
             }
         });

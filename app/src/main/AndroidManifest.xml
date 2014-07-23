@@ -35,7 +35,7 @@
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
         </activity>
         <activity
-            android:name=".PrefCalendar"
+            android:name=".PreferenceActivityNewEvent"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
         </activity>
 

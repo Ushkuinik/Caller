@@ -24,5 +24,8 @@
     <string name="event_time">Time</string>
     <string name="action_save">Save</string>
     <string name="calendar_activity_title">New event</string>
+    <string name="date_format">yyyy/MM/dd</string>
+    <string name="time_format">HH:mm</string>
+    <string name="datetime_format">"yyyy/MM/dd HH:mm"</string>
 
 </resources>
