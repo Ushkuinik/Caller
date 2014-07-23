@@ -34,13 +34,22 @@
 
         <company.caller.PreferenceDate
             android:key="event_date"
-            android:title="@string/event_date"
-            android:defaultValue="2015.01.01" />
+            android:title="@string/event_date" />
 
         <company.caller.PreferenceTime
             android:key="event_time"
-            android:title="@string/event_time"
-            android:defaultValue="15:00" />
+            android:title="@string/event_time" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="OPTIONS">
+
+        <CheckBoxPreference
+            android:key="event_reminder"
+            android:title="Reminder"
+            android:summaryOn="You will be reminded 15min before event"
+            android:summaryOff="Reminder disabled"/>
 
     </PreferenceCategory>
 </PreferenceScreen>

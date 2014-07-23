@@ -190,7 +190,8 @@ public class PreferenceTime extends DialogPreference implements TimePicker.OnTim
      * @return the Calendar set to the default date
      */
     public static Calendar defaultCalendar() {
-        return new GregorianCalendar(1970, 0, 1, 0, 0);
+//        return new GregorianCalendar(1970, 0, 1, 0, 0);
+        return new GregorianCalendar();
     }
 
     /**

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -125,6 +126,10 @@ public class PreferenceActivityNewEvent extends PreferenceActivity{
 
             if(this.mEmail != null)
                 addAttendee(eventId, this.mName, this.mEmail);
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            if(sharedPreferences.getBoolean("event_reminder", false))
+                addReminder(eventId);
         }
         else {
             if((title == null) || (title.isEmpty())) {
@@ -141,20 +146,37 @@ public class PreferenceActivityNewEvent extends PreferenceActivity{
 
 
 
-    private void addAttendee(long eventId, String mName, String mEmail) {
+    private void addAttendee(long _id, String _name, String _email) {
         Log.d(this.LOG_TAG, "addAttendee");
 
-        ContentResolver cr = getContentResolver();
+        ContentResolver contentResolver = getContentResolver();
         ContentValues values = new ContentValues();
-        values.put(CalendarContract.Attendees.ATTENDEE_NAME, mName);
-        values.put(CalendarContract.Attendees.ATTENDEE_EMAIL, mEmail);
+        values.put(CalendarContract.Attendees.ATTENDEE_NAME, _name);
+        values.put(CalendarContract.Attendees.ATTENDEE_EMAIL, _email);
         values.put(CalendarContract.Attendees.ATTENDEE_RELATIONSHIP, CalendarContract.Attendees.RELATIONSHIP_ATTENDEE);
         values.put(CalendarContract.Attendees.ATTENDEE_TYPE, CalendarContract.Attendees.TYPE_OPTIONAL);
         values.put(CalendarContract.Attendees.ATTENDEE_STATUS, CalendarContract.Attendees.ATTENDEE_STATUS_INVITED);
-        values.put(CalendarContract.Attendees.EVENT_ID, eventId);
-        Uri uri = cr.insert(CalendarContract.Attendees.CONTENT_URI, values);
+        values.put(CalendarContract.Attendees.EVENT_ID, _id);
+        Uri uri = contentResolver.insert(CalendarContract.Attendees.CONTENT_URI, values);
 
         long attendeeId = Long.parseLong(uri.getLastPathSegment());
         Toast.makeText(getApplicationContext(), "Attendee added. Id: " + attendeeId, Toast.LENGTH_SHORT).show();
+    }
+
+
+
+    private void addReminder(long _id) {
+        Log.d(this.LOG_TAG, "addReminder");
+
+        ContentResolver contentResolver = getContentResolver();
+        ContentValues values = new ContentValues();
+
+        values.put(CalendarContract.Reminders.MINUTES, 15);
+        values.put(CalendarContract.Reminders.EVENT_ID, _id);
+        values.put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT);
+        Uri uri = contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, values);
+
+        long reminderId = Long.parseLong(uri.getLastPathSegment());
+        Toast.makeText(getApplicationContext(), "Reminder added. Id: " + reminderId, Toast.LENGTH_SHORT).show();
     }
 }

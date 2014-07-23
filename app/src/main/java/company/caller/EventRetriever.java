@@ -58,7 +58,8 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("prefPhoneNumber", contact.getIncomingNumber());
         editor.putString("prefContactName", contact.name); // rewrite with null if no name
-        editor.putString("prefContactEmail", contact.emails.get(0)); // rewrite with null if no emails
+        if(contact.emails.size() > 0)
+            editor.putString("prefContactEmail", contact.emails.get(0)); // rewrite with null if no emails
         editor.commit();
 
         if (prefEnableCallLogEvents) {
