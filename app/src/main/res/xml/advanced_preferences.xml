@@ -13,7 +13,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="What">
+        android:title="WHAT?">
 
         <EditTextPreference
             android:key="event_title"
@@ -30,7 +30,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="When">
+        android:title="WHEN?">
 
         <company.caller.PreferenceDate
             android:key="event_date"
