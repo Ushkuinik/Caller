@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -66,8 +67,8 @@ public class ActivitySettings extends Activity {
         });
 
 
-        Button btnWindow = (Button) findViewById(R.id.btnWindow);
-        Button btnCalendar = (Button) findViewById(R.id.btnCalendar1);
+//        Button btnWindow = (Button) findViewById(R.id.btnWindow);
+//        Button btnCalendar = (Button) findViewById(R.id.btnCalendar1);
         SeekBar seekCallLogDepth = (SeekBar) findViewById(R.id.seekCallLogDepth);
         SeekBar seekShutdownDelay = (SeekBar) findViewById(R.id.seekShutdownDelay);
         TextView textCallLogDepthValue = (TextView) findViewById(R.id.textCallLogDepthValue);
@@ -77,17 +78,17 @@ public class ActivitySettings extends Activity {
         CheckBox checkEnableCalendarEvents = (CheckBox) findViewById(R.id.checkEnableCalendarEvents);
 
 
-        btnWindow.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                createDialog();
-            }
-        });
-        btnCalendar.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                Intent i = new Intent(getBaseContext(), ActivityCalendar.class);
-                startActivity(i);
-            }
-        });
+//        btnWindow.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View view) {
+//                createDialog();
+//            }
+//        });
+//        btnCalendar.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View view) {
+//                Intent i = new Intent(getBaseContext(), PreferenceActivityNewEvent.class);
+//                startActivity(i);
+//            }
+//        });
 
         // retrieve preferences
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -177,8 +178,31 @@ public class ActivitySettings extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_window_actions, menu);
+        inflater.inflate(R.menu.menu_settings_actions, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(this.LOG_TAG, "onOptionsItemSelected");
+
+        // Handle presses on the action bar items
+        switch(item.getItemId()) {
+            case R.id.action_add_event:
+                Intent i = new Intent(getBaseContext(), PreferenceActivityNewEvent.class);
+                startActivity(i);
+                return true;
+
+            case R.id.action_show_window:
+                createDialog();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 

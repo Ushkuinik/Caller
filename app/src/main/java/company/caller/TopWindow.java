@@ -154,7 +154,8 @@ public class TopWindow extends StandOutWindow {
                 Intent i = new Intent(getBaseContext(), ActivitySettings.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
-                TopWindow.super.hide(id);
+
+                TopWindow.super.close(id);
                 Toast.makeText(getApplicationContext(), "Settings was pressed!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -164,10 +165,11 @@ public class TopWindow extends StandOutWindow {
 
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getBaseContext(), ActivityCalendar.class);
+                Intent i = new Intent(getBaseContext(), PreferenceActivityNewEvent.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                TopWindow.super.close(id);
                 startActivity(i);
+
+                TopWindow.super.close(id);
                 Toast.makeText(getApplicationContext(), "Calendar was pressed!", Toast.LENGTH_SHORT).show();
             }
         });

@@ -127,16 +127,16 @@
             android:progress="0"/>
     </LinearLayout>
 
-    <Button
+    <!--Button
         android:id="@+id/btnWindow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="@string/hello_world" /-->
 
-    <Button
+    <!--Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Calendar"
-        android:id="@+id/btnCalendar1"/>
+        android:id="@+id/btnCalendar1"/-->
 
 </LinearLayout>

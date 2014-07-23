@@ -31,10 +31,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ActivityCalendar"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
-        </activity>
-        <activity
             android:name=".PreferenceActivityNewEvent"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
         </activity>
