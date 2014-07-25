@@ -8,6 +8,10 @@
           android:showAsAction="always" />
 
     <item android:id="@+id/action_show_window"
-          android:title="Window"
-          android:showAsAction="ifRoom" />
+          android:title="@string/action_window"
+          android:showAsAction="always" />
+
+    <item android:id="@+id/action_facebook"
+          android:title="@string/action_facebook"
+          android:showAsAction="always" />
 </menu>

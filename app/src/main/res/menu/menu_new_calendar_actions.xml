@@ -6,6 +6,6 @@
           android:title="@string/action_save"
           android:showAsAction="always" />
     <item android:id="@+id/action_clear"
-          android:title="Clear"
+          android:title="@string/action_clear"
           android:showAsAction="always" />
 </menu>

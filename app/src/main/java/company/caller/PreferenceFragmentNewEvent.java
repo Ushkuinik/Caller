@@ -53,8 +53,8 @@ public class PreferenceFragmentNewEvent extends PreferenceFragment
         super.onCreate(savedInstanceState);
         Log.d(this.LOG_TAG, "onCreate");
 
-        addPreferencesFromResource(R.xml.advanced_preferences);
-        PreferenceManager.setDefaultValues(getActivity(), R.xml.advanced_preferences, false);
+        addPreferencesFromResource(R.xml.preferences_new_calendar_event);
+        PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences_new_calendar_event, false);
 
         // populate Calendar list on creation
         final ListPreference listCalendar = (ListPreference) findPreference("list_calendar");

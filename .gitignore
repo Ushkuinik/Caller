@@ -5,6 +5,8 @@
 
 /build
 /libraries/standout/build
+/libraries/facebook/build
+
 
 *.aar
 *.jar

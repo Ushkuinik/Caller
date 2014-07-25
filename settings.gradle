@@ -1,1 +1,1 @@
-include ':app', ':libraries:standout'
+include ':app', ':libraries:standout', ':libraries:facebook'

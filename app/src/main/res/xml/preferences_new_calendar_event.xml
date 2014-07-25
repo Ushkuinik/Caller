@@ -1,16 +1,55 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference
-        android:key="pref_sync"
-        android:title="Title"
-        android:summary="Summary"
-        android:defaultValue="true" />
-    <ListPreference
-        android:dependency="pref_sync"
-        android:key="pref_syncConnectionType"
-        android:title="ListTitle"
-        android:dialogTitle="Dialog Title"
-        android:entries="@array/pref_syncConnectionTypes_entries"
-        android:entryValues="@array/pref_syncConnectionTypes_values"
-        android:defaultValue="@string/pref_syncConnectionTypes_default" />
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/category_storage">
+
+        <ListPreference
+            android:key="list_calendar"
+            android:title="@string/pref_calendar_title"
+            android:summary="@string/pref_calendar_summary"
+            android:dialogTitle="@string/pref_calendar_dialog_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/category_what">
+
+        <EditTextPreference
+            android:key="event_title"
+            android:title="@string/pref_title_title"
+            android:summary="@string/pref_title_summary"
+            android:dialogTitle="@string/pref_title_dialog_title" />
+
+        <EditTextPreference
+            android:key="event_description"
+            android:title="@string/pref_description_title"
+            android:summary="@string/pref_description_summary"
+            android:dialogTitle="@string/pref_description_dialog_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/category_when">
+
+        <company.caller.PreferenceDate
+            android:key="event_date"
+            android:title="@string/event_date" />
+
+        <company.caller.PreferenceTime
+            android:key="event_time"
+            android:title="@string/event_time" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/category_options">
+
+        <CheckBoxPreference
+            android:key="event_reminder"
+            android:title="@string/pref_reminder_title"
+            android:summaryOn="@string/pref_reminder_summary_on"
+            android:summaryOff="@string/pref_reminder_summary_off"/>
+
+    </PreferenceCategory>
 </PreferenceScreen>

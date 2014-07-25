@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -200,6 +199,11 @@ public class ActivitySettings extends Activity {
                 createDialog();
                 return true;
 
+            case R.id.action_facebook:
+                i = new Intent(getBaseContext(), ActivityFacebook.class);
+                startActivity(i);
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -232,7 +236,7 @@ public class ActivitySettings extends Activity {
         final EditText input = (EditText) promptView.findViewById(R.id.userInput);
 
         alertDialogBuilder.setCancelable(false);
-        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton(getResources().getString(R.string.button_ok), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // get user input and set it to result
                 String number = input.getText().toString();
@@ -249,7 +253,7 @@ public class ActivitySettings extends Activity {
                 }
             }
         });
-        alertDialogBuilder.setNegativeButton("Cancel",
+        alertDialogBuilder.setNegativeButton(getResources().getString(R.string.button_cancel),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Log.d(LOG_TAG, ": Dialog cancelled");
