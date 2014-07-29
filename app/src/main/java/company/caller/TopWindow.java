@@ -156,7 +156,7 @@ public class TopWindow extends StandOutWindow {
                 startActivity(i);
 
                 TopWindow.super.close(id);
-                Toast.makeText(getApplicationContext(), "Settings was pressed!", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Settings was pressed!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -170,7 +170,7 @@ public class TopWindow extends StandOutWindow {
                 startActivity(i);
 
                 TopWindow.super.close(id);
-                Toast.makeText(getApplicationContext(), "Calendar was pressed!", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Calendar was pressed!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -179,7 +179,7 @@ public class TopWindow extends StandOutWindow {
 
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Title was pressed!", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Title was pressed!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -508,9 +508,10 @@ public class TopWindow extends StandOutWindow {
                                 if(data.equals(contact.getIncomingNumber())) {
                                     Log.d(this.LOG_TAG, "Skipped number. it is same as incomingNumber");
                                 }
-                                else
-                                    Log.d(this.LOG_TAG, "Added");
+                                else {
+                                    Log.d(this.LOG_TAG, "Added number " + data);
                                     contact.numbers.add(data);
+                                }
                             }
                             else if(mime.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
                                 contact.emails.add(data.toLowerCase());

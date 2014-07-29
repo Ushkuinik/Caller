@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  *
@@ -17,11 +18,13 @@ public class EventAdapter extends ArrayAdapter<Event> {
     private final String LOG_TAG = this.getClass().toString();
     private LayoutInflater inflater;
     private ArrayList<Event> events;
+    private Context mContext;
 
     EventAdapter(final Context context, final ArrayList<Event> events) {
     	super(context, R.layout.event, events);
 
-        this.events   = events;
+        mContext = context;
+        this.events = events;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -53,35 +56,34 @@ public class EventAdapter extends ArrayAdapter<Event> {
         Event event = getEvent(position);
 //        Log.d(this.LOG_TAG, ": getView: event.desc: " + event.datetime + ", event.desc: " + event.description);
 
-        ((TextView) view.findViewById(R.id.textDatetime)).setText(event.datetime);
-        ((TextView) view.findViewById(R.id.textDescription)).setText(event.description);
-//        TextView description = (TextView) view.findViewById(R.id.textDescription);
+        ((TextView) view.findViewById(R.id.textDatetime)).setText(event.getDateTimeFormatted(mContext.getString(R.string.datetime_format)));
+        ((TextView) view.findViewById(R.id.textDescription)).setText(event.getDescription());
         ImageView imageType = (ImageView) view.findViewById(R.id.iconType);
+        imageType.setAlpha(0xFF);
 
-        switch (event.type) {
+        switch (event.getType()) {
             case EVENT_INCOMING_CALL:
                 imageType.setImageResource(R.drawable.ic_arrow_green);
-                //description.setVisibility(View.GONE);
                 break;
 
             case EVENT_OUTGOING_CALL:
-                imageType.setImageResource(R.drawable.ic_arrow_red);
-                //description.setVisibility(View.GONE);
+                imageType.setImageResource(R.drawable.ic_arrow_blue);
                 break;
 
             case EVENT_MISSED_CALL:
                 imageType.setImageResource(R.drawable.ic_cross_red);
-                //description.setVisibility(View.GONE);
                 break;
 
             case EVENT_CALENDAR:
                 imageType.setImageResource(R.drawable.ic_calendar);
-                //description.setText(event.description);
+                if(event.isPast())
+                    imageType.setAlpha(100);
                 break;
 
             case EVENT_REMINDER:
                 imageType.setImageResource(R.drawable.ic_bell);
-                //description.setText(event.description);
+                if(event.isPast())
+                    imageType.setAlpha(100);
                 break;
 
             case EVENT_UNDEFINED:

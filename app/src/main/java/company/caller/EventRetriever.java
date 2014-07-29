@@ -2,6 +2,7 @@ package company.caller;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -63,9 +64,15 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         editor.commit();
 
         if (prefEnableCallLogEvents) {
+            ArrayList<Event> eventsCallLog = null;
+
             // Search for call log first
             for (String number : contact.numbers) {
-                this.doSearchPhoneLogs(number);
+                eventsCallLog = this.doSearchPhoneLogs(number);
+                for(Event e : eventsCallLog) {
+                    this.publishProgress(e);
+                }
+                eventsCallLog.clear();
             }
         }
 
@@ -77,12 +84,33 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
             if (contact.name != null)
                 searchStrings.add(contact.name);   // ... name
 
-            this.doSearchCalendarEvents(searchStrings);
+            ArrayList<Event> eventsCalendar = null;
+            ArrayList<Event> eventsAttendee = null;
+            ArrayList<Event> eventsAttendeeClone = null;
+            eventsCalendar = this.doSearchCalendarEvents(searchStrings);
 
             // Look for calendar events by attendees
+            ArrayList<String> emails = new ArrayList<String>();
             for (String email : contact.emails) {
-                this.doSearchCalendarAttendees(email);
+                emails.add(email);
             }
+            eventsAttendee = this.doSearchCalendarAttendees(emails);
+            eventsAttendeeClone = (ArrayList<Event>) eventsAttendee.clone();
+
+            for(Event e1 : eventsCalendar) {
+                int id = e1.getId();
+                for(Event e2 : eventsAttendeeClone) {
+                    if(id == e2.getId())
+                        eventsAttendee.remove(e2);
+                }
+            }
+
+            eventsCalendar.addAll(eventsAttendee);
+            Collections.sort(eventsCalendar);
+            for(Event e : eventsCalendar) {
+                this.publishProgress(e);
+            }
+
         }
 
 	    return null;
@@ -116,9 +144,10 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
 
 	abstract void onSearchFinished();
 
-	private void doSearchPhoneLogs(final String phoneNum)
+	private ArrayList<Event> doSearchPhoneLogs(final String phoneNum)
 	{
-        Log.d(this.LOG_TAG, "doSearchPhoneLogs");
+        Log.d(this.LOG_TAG, "doSearchPhoneLogs(" + phoneNum + ")");
+        ArrayList<Event> events = new ArrayList<Event>();
 
 		String[] projection = new String[] {
                 CallLog.Calls._ID,
@@ -131,9 +160,9 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         int prefCallLogDepth = preferences.getInt("prefCallLogDepth", 0);
 
-        String sortOrder = null;
+        String sortOrder = CallLog.Calls._ID + " DESC"; // last records will be first
         if (prefCallLogDepth != 0)
-            sortOrder = CallLog.Calls._ID + " ASC LIMIT '" + prefCallLogDepth + "'";
+            sortOrder += " LIMIT '" + prefCallLogDepth + "'";
 
         Cursor cursor = this.mContext.getContentResolver().query(
                 CallLog.Calls.CONTENT_URI,
@@ -142,17 +171,12 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
                 null,
                 sortOrder);
 
-        while (cursor.moveToNext()) {
+        cursor.moveToLast();
+        while (cursor.moveToPrevious()) {
+            String id = cursor.getString(cursor.getColumnIndex(CallLog.Calls._ID));
             String callType = cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE));
             String callDate = cursor.getString(cursor.getColumnIndex(CallLog.Calls.DATE));
-            Date callDayTime = new Date(Long.valueOf(callDate));
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-
-            String datetime = formatter.format(callDayTime);
-            Resources r = this.mContext.getResources();
-            String description = r.getString(R.string.strDurationIs) +
-                    cursor.getString(cursor.getColumnIndex(CallLog.Calls.DURATION)) +
-                    r.getString(R.string.strSec);
+            String duration = cursor.getString(cursor.getColumnIndex(CallLog.Calls.DURATION));
 
             // TODO Group consequent unanswered calls
             Event.EventType type;
@@ -175,15 +199,18 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
                 	break;
             }
 
-            Event newEvent = new Event(type, datetime, description);
-            this.publishProgress(newEvent);
+            events.add(new Event(mContext, Integer.parseInt(id), type, Long.parseLong(callDate), null, duration));
+            Log.d(this.LOG_TAG, "Found call record");
+
         }
 
         cursor.close();
+        return events;
 	}
 
-    private void doSearchCalendarEvents(List<String> strings) {
+    private ArrayList<Event> doSearchCalendarEvents(List<String> _strings) {
         Log.d(this.LOG_TAG, "doSearchCalendarEvents");
+        ArrayList<Event> events = new ArrayList<Event>();
 
         String[] projection = new String[] {
                 CalendarContract.Events._ID,
@@ -195,7 +222,7 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         String selection = "";
         ArrayList<String> argsList = new ArrayList<String>();
 
-        for (String s : strings) {
+        for (String s : _strings) {
             if (!selection.isEmpty())
                 selection += " OR ";
 
@@ -221,28 +248,19 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         while (cursor.moveToNext()) {
             String id = cursor.getString(cursor.getColumnIndex(CalendarContract.Events._ID));
             String title = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.TITLE));
-            String desc = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.DESCRIPTION));
+            String description = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.DESCRIPTION));
             String start = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.DTSTART));
-            title = (title == null) ? "" : title;
-            desc = (desc == null) ? "" : desc;
 
-            Date callDayTime = new Date(Long.valueOf(start));
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+            Event.EventType type = (doCheckReminder(Integer.parseInt(id))) ?
+                    Event.EventType.EVENT_REMINDER :
+                    Event.EventType.EVENT_CALENDAR;
 
-            String datetime = formatter.format(callDayTime);
-            String description = title + " // " + desc;
-
-            Event.EventType type = Event.EventType.EVENT_CALENDAR;
-            if (doCheckReminder(Long.parseLong(id)))
-                type = Event.EventType.EVENT_REMINDER;
-
-            Event newEvent = new Event(type, datetime, description);
+            events.add(new Event(mContext, Integer.parseInt(id), type, Long.valueOf(start), title, description));
             Log.d(this.LOG_TAG, "Calendar event found. id: " + id + ", description: " + description);
-
-            this.publishProgress(newEvent);
         }
 
         cursor.close();
+        return events;
 	}
 
 
@@ -252,7 +270,7 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
      * @param _id event id
      * @return true if specified event has a reminder, false otherwise
      */
-    private boolean doCheckReminder(long _id) {
+    private boolean doCheckReminder(int _id) {
         Log.d(this.LOG_TAG, "doCheckReminder");
 
         boolean result = false;
@@ -274,16 +292,23 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
     }
 
 
-
-	private void doSearchCalendarAttendees(String _email)
+    /**
+     *
+     * @param _strings list of emails
+     * @return events array
+     */
+	private ArrayList<Event> doSearchCalendarAttendees(ArrayList<String> _strings)
 	{
         Log.d(this.LOG_TAG, "doSearchCalendarAttendees");
+        for(String s : _strings) {
+            Log.d(this.LOG_TAG, "email : " + s);
+        }
 
-        String datetime = "";
+        ArrayList<Event> events = new ArrayList<Event>();
+
+        String title = "";
         String description = "";
-        if(_email == null)
-            return;
-        String email_lower = _email.toLowerCase();
+        String start = "";
 
         String[] projection = new String[] {
                 CalendarContract.Attendees.EVENT_ID,
@@ -291,7 +316,24 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
                 CalendarContract.Attendees.ATTENDEE_EMAIL
         };
 
-        Cursor cursor = this.mContext.getContentResolver().query(CalendarContract.Attendees.CONTENT_URI, projection, null, null, null);
+        String selection = "";
+        ArrayList<String> argsList = new ArrayList<String>();
+
+        for (String s : _strings) {
+            if (!selection.isEmpty())
+                selection += " OR ";
+
+            selection += CalendarContract.Attendees.ATTENDEE_EMAIL + " LIKE ? ";
+            argsList.add("%" + s + "%");
+        }
+        String[] selectionArgs = argsList.toArray(new String[0]);
+
+        Cursor cursor = this.mContext.getContentResolver().query(
+                CalendarContract.Attendees.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                null);
         Log.d(this.LOG_TAG, "doSearchCalendarAttendees found " + cursor.getCount() + " records");
 
         while (cursor.moveToNext()) {
@@ -299,54 +341,44 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
             String attendee = cursor.getString(cursor.getColumnIndex(CalendarContract.Attendees.ATTENDEE_NAME));
             String email = cursor.getString(cursor.getColumnIndex(CalendarContract.Attendees.ATTENDEE_EMAIL));
 
-            Log.d(this.LOG_TAG, "doSearchCalendarAttendees found attendee: " + attendee);
+            Log.d(this.LOG_TAG, "doSearchCalendarAttendees found id: " + id + " attendee: " + attendee + " email: " + email);
 
             // if attendee was found, look for related event to get its time and description
-            if(email.toLowerCase().contains(email_lower)) {
+            String[] projection2 = new String[]{
+                    CalendarContract.Events._ID,
+                    CalendarContract.Events.TITLE,
+                    CalendarContract.Events.DESCRIPTION,
+                    CalendarContract.Events.DTSTART
+            };
 
-                String[] projection2 = new String[]{
-                        CalendarContract.Events._ID,
-                        CalendarContract.Events.TITLE,
-                        CalendarContract.Events.DESCRIPTION,
-                        CalendarContract.Events.DTSTART
-                };
+            String selection2 = CalendarContract.Events._ID + " = ?";
+            String[] selectionArgs2 = new String[]{id};
 
-                String selection2 = CalendarContract.Events._ID + " = ?";
-                String[] selectionArgs2 = new String[]{id};
+            Cursor cursor2 = this.mContext.getContentResolver().query(
+                    CalendarContract.Events.CONTENT_URI,
+                    projection2,
+                    selection2,
+                    selectionArgs2,
+                    null);
 
-                Cursor cursor2 = this.mContext.getContentResolver().query(
-                        CalendarContract.Events.CONTENT_URI,
-                        projection2,
-                        selection2,
-                        selectionArgs2,
-                        null);
+            // there should be only one record for certain id
+            while (cursor2.moveToNext()) {
 
-                // there should be only one record for certain id
-                while (cursor2.moveToNext()) {
-
-                    String title = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Events.TITLE));
-                    String desc = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Events.DESCRIPTION));
-                    String start = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Events.DTSTART));
-                    title = (title == null) ? "" : title;
-                    desc = (desc == null) ? "" : desc;
-
-                    Date callDayTime = new Date(Long.valueOf(start));
-
-                    SimpleDateFormat formatter = new SimpleDateFormat(mContext.getString(R.string.datetime_format));
-
-                    datetime = formatter.format(callDayTime);
-                    description = title + " // " + desc;
-                    Log.d(this.LOG_TAG, "Calendar event found. Description: " + description);
-                }
-
-                cursor2.close();
-
-                Event newEvent = new Event(Event.EventType.EVENT_CALENDAR, datetime, description);
-                this.publishProgress(newEvent);
+                title = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Events.TITLE));
+                description = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Events.DESCRIPTION));
+                start = cursor2.getString(cursor2.getColumnIndex(CalendarContract.Events.DTSTART));
+                Log.d(this.LOG_TAG, "Calendar event found");
             }
+
+            cursor2.close();
+            Event.EventType type = (doCheckReminder(Integer.parseInt(id))) ?
+                    Event.EventType.EVENT_REMINDER :
+                    Event.EventType.EVENT_CALENDAR;
+            events.add(new Event(mContext, Integer.parseInt(id), type, Long.parseLong(start), title, description));
 
         }
 
         cursor.close();
+        return events;
 	}
 }

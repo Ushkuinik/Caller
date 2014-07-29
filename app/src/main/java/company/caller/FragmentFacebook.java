@@ -24,7 +24,6 @@ import com.facebook.widget.LoginButton;
 import com.facebook.widget.WebDialog;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  *
@@ -34,7 +33,7 @@ public class FragmentFacebook extends Fragment {
     private static final String LOG_TAG = "FragmentFacebook";
     private UiLifecycleHelper uiHelper;
     private Bundle savedInstanceState;
-    private Button sendRequestButton;
+    private Button buttonLogin;
 
 
     @Override
@@ -68,15 +67,9 @@ public class FragmentFacebook extends Fragment {
 
         LoginButton authButton = (LoginButton) view.findViewById(R.id.authButton);
         authButton.setFragment(this);
-        authButton.setReadPermissions(Arrays.asList("user_likes", "user_status", "friends_birthday"));
+        authButton.setReadPermissions(Arrays.asList("user_events"));
 
-        sendRequestButton = (Button) view.findViewById(R.id.sendRequestButton);
-        sendRequestButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendRequestDialog();
-            }
-        });
+        Button buttonLogin = (Button) view.findViewById(R.id.buttonLogin);
 
         return view;
     }
@@ -88,12 +81,16 @@ public class FragmentFacebook extends Fragment {
 
         if (state.isOpened()) {
             Log.d(LOG_TAG, "Logged in");
-            makeFriendsRequest();
-            sendRequestButton.setVisibility(View.VISIBLE);
+            makeEventRequest();
+
+            if(buttonLogin != null)
+                buttonLogin.setText("Logout");
         }
         else if (state.isClosed()) {
             Log.d(LOG_TAG, "Logged out");
-            sendRequestButton.setVisibility(View.INVISIBLE);
+
+            if(buttonLogin != null)
+                buttonLogin.setText("Login");
         }
     }
 
@@ -109,7 +106,7 @@ public class FragmentFacebook extends Fragment {
         Session session = Session.getActiveSession();
         if (session != null &&
                 (session.isOpened() || session.isClosed()) ) {
-            onSessionStateChange(session, session.getState(), null);
+//            onSessionStateChange(session, session.getState(), null);
         }
 
         uiHelper.onResume();
@@ -144,68 +141,27 @@ public class FragmentFacebook extends Fragment {
     }
 
 
-    private void makeFriendsRequest() {
-        Log.d(this.LOG_TAG, "makeFriendsRequest");
-        Request myFriendsRequest = Request.newMyFriendsRequest(Session.getActiveSession(),
-                new Request.GraphUserListCallback() {
+    private void makeEventRequest() {
+        Log.d(this.LOG_TAG, "makeEventRequest");
+        Request meRequest = Request.newMeRequest(Session.getActiveSession(),
+                new Request.GraphUserCallback() {
 
+                    /**
+                     * The method that will be called when the request completes.
+                     *
+                     * @param user     the GraphObject representing the returned user, or null
+                     * @param response the Response of this request, which may include error information if the request was unsuccessful
+                     */
                     @Override
-                    public void onCompleted(List<GraphUser> users, Response response) {
+                    public void onCompleted(GraphUser user, Response response) {
                         Log.d(LOG_TAG, "response: " + response.getRawResponse());
-                        if (response.getError() == null) {
-
-                        }
-                        else
-                            Log.d(LOG_TAG, "error: " + response.getError());
                     }
+                }
+        );
 
-                });
-        // Add birthday to the list of info to get.
-        Bundle requestParams = myFriendsRequest.getParameters();
-        requestParams.putString("fields", "name,birthday");
-        myFriendsRequest.setParameters(requestParams);
-        myFriendsRequest.executeAsync();
-    }
-
-    private void sendRequestDialog() {
-        Bundle params = new Bundle();
-        params.putString("message", "Learn how to make your Android apps social");
-
-        WebDialog requestsDialog = (
-                new WebDialog.RequestsDialogBuilder(getActivity(),
-                        Session.getActiveSession(),
-                        params))
-                .setOnCompleteListener(new WebDialog.OnCompleteListener() {
-
-                    @Override
-                    public void onComplete(Bundle values,
-                                           FacebookException error) {
-                        if (error != null) {
-                            if (error instanceof FacebookOperationCanceledException) {
-                                Toast.makeText(getActivity().getApplicationContext(),
-                                        "Request cancelled",
-                                        Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getActivity().getApplicationContext(),
-                                        "Network Error",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            final String requestId = values.getString("request");
-                            if (requestId != null) {
-                                Toast.makeText(getActivity().getApplicationContext(),
-                                        "Request sent",
-                                        Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getActivity().getApplicationContext(),
-                                        "Request cancelled",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-
-                })
-                .build();
-        requestsDialog.show();
+        Bundle requestParams = meRequest.getParameters();
+        requestParams.putString("fields", "id,name");
+        meRequest.setParameters(requestParams);
+        meRequest.executeAsync();
     }
 }
