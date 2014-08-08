@@ -158,7 +158,7 @@ public abstract class EventRetriever extends AsyncTask<Contact, Event, Void>
         };
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        int prefCallLogDepth = preferences.getInt("prefCallLogDepth", 0);
+        int prefCallLogDepth = preferences.getInt("prefCallLogDepth", 20) + 1;
 
         String sortOrder = CallLog.Calls._ID + " DESC"; // last records will be first
         if (prefCallLogDepth != 0)

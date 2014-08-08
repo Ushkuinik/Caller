@@ -60,10 +60,13 @@ public class PreferenceFragmentNewEvent extends PreferenceFragment
         final ListPreference listCalendar = (ListPreference) findPreference("list_calendar");
         setListPreferenceData(listCalendar);
 
+        String summary;
         if((mEmail != null) && (mName != null)) {
-            findPreference("event_description").setSummary("Event related to " + mName + ".");
+            summary = String.format(getResources().getString(R.string.strDefaultEventDescription), mName);//   "Event related to " + mName + ".");
+            findPreference("event_description").setSummary(summary);
         } else if(mName == null) {
-            findPreference("event_description").setSummary("Event related to " + mNumber + ".");
+            summary = String.format(getResources().getString(R.string.strDefaultEventDescription), mNumber);//   "Event related to " + mName + ".");
+            findPreference("event_description").setSummary(summary);
         }
 
         initSummary(getPreferenceScreen());

@@ -2,6 +2,7 @@ package company.caller;
 
 //import android.app.Fragment;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
+import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -23,6 +25,18 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.WebDialog;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 /**
@@ -70,6 +84,13 @@ public class FragmentFacebook extends Fragment {
         authButton.setReadPermissions(Arrays.asList("user_events"));
 
         Button buttonLogin = (Button) view.findViewById(R.id.buttonLogin);
+        buttonLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HttpTask t = new HttpTask();
+                t.execute();
+            }
+        });
 
         return view;
     }
@@ -163,5 +184,39 @@ public class FragmentFacebook extends Fragment {
         requestParams.putString("fields", "id,name");
         meRequest.setParameters(requestParams);
         meRequest.executeAsync();
+    }
+
+
+    class HttpTask extends AsyncTask<Void, Void, Void> {
+
+        private Exception exception;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String response = null;
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            String r = "https://www.facebook.com/ajax/typeahead/search.php?value=newest%40mail.ru&viewer=100006566419427&rsp=search&context=search&sid=0.28518511611036956&path=%2Ffriends%2Frequests%2F&request_id=0.7471362194046378&__user=100006566419427&__a=1&__dyn=7n8ahyj35zoSt2u6aAix9wACxO4oKAdBGfirWo8popyUW5ogxd2E&__req=j&__rev=1346601";
+            try {
+                HttpClient client = new DefaultHttpClient();
+                HttpGet request = new HttpGet();
+                request.setURI(new URI(r));
+//                request.setURI(new URI("http://google.com"));
+                response = client.execute(request, responseHandler);
+            } catch (URISyntaxException e) {
+                Log.d(LOG_TAG, "doInBackground, URISyntaxException");
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                Log.d(LOG_TAG, "doInBackground, ClientProtocolException");
+                e.printStackTrace();
+            } catch (IOException e) {
+                Log.d(LOG_TAG, "doInBackground, IOException");
+                e.printStackTrace();
+            }
+
+            if(response != null)
+                Log.d(LOG_TAG, "doInBackground, response: " + response);
+
+            return null;
+        }
     }
 }

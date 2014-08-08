@@ -50,5 +50,6 @@
     <string name="action_facebook">Facebook</string>
     <string name="app_id">504530416315783</string>
     <string name="send_request">Request</string>
+    <string name="strDefaultEventDescription">Event related to %1$s</string>
 
 </resources>

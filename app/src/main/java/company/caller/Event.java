@@ -107,7 +107,7 @@ public class Event implements Comparable<Event>{
             case EVENT_INCOMING_CALL:
             case EVENT_OUTGOING_CALL:
                 Resources r = this.mContext.getResources();
-                description = r.getString(R.string.strDurationIs) + mDescription;
+                description = r.getString(R.string.strDurationIs) + mDescription + r.getString(R.string.strSec);
                 break;
 
             case EVENT_MISSED_CALL:
